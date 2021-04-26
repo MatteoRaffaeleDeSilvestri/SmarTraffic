@@ -74,7 +74,7 @@ while True:
             frame = cv2.putText(img, label + ' ' + confidence, (x, y + 20), font, 1, (255, 255, 255), 1)
             # cv2.putText(img, '', (x, y + 20), font, 2, (255, 255, 255), 1)
 
-            cv2.imwrite('render/frame{}.jpg'.format(frame_num), frame)
+    cv2.imwrite('render/frame{}.jpg'.format(frame_num), frame)
 
     cv2.imshow('Test', img)
     key = cv2.waitKey(1)
