@@ -10,7 +10,7 @@ with open('coco.names', 'r') as f:
 
 # print(classes)
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture('video/t4.mp4')
 
 font = cv2.FONT_HERSHEY_DUPLEX
 
@@ -70,11 +70,11 @@ while True:
             label = str(classes[class_ids[i]])
             confidence = str(round(confidences[i], 1))
             # color = colors[i]
-            frame = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 230, 0), 2)
-            frame = cv2.putText(img, label + ' ' + confidence, (x, y + 20), font, 1, (255, 255, 255), 1)
+            img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 230, 0), 2)
+            img = cv2.putText(img, label + ' ' + confidence, (x, y + 20), font, 1, (255, 255, 255), 1)
             # cv2.putText(img, '', (x, y + 20), font, 2, (255, 255, 255), 1)
 
-    cv2.imwrite('render/frame{}.jpg'.format(frame_num), frame)
+    cv2.imwrite('render/frame{}.jpg'.format(frame_num), img)
 
     cv2.imshow('Test', img)
     key = cv2.waitKey(1)
