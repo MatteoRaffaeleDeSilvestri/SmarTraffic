@@ -13,3 +13,9 @@ PROGRAMMA
 - Rilevare la tipologia di veicolo
 - Rilevare la velocità  di ciascun veicolo e verificare se sia entro i limiti stabiliti per legge
 - Rilevare anomaile del traffico (auto che procedono in senso opposto a quello di marcia)
+
+
+- Crea una GUI di partenza in cui indicare la fonte video (scelta da un menù a tendina) e le 
+  operazioni di controllo che si intende effettuare su tale video (controllo del traffico in entrata/uscita,
+  controllo della velocità, tipologie di veicoli in transito, generazione di un database per ogni veicolo in
+  ingresso/uscita dal tratto di strada controllato)
