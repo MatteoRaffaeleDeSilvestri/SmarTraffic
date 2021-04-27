@@ -1,0 +1,15 @@
+DOCUMENTAZIONE
+
+- Creare un README.md file che spieghi:
+    - Come eseguire il codice (package da installare, ambiante di sviluppo etc...)
+    - Presentazione in breve dell'idea del progetto da affiancare alla presentazione di Accenture
+    - Nozioni più tecniche rispetto a quelle esposte nella presenatzione del progetto via pptx
+
+- Generare requirements.txt file via venv (pip3)
+
+PROGRAMMA
+
+- Rilevare veicoli in ingresso ed in uscita via opencv (conteggio)
+- Rilevare la tipologia di veicolo
+- Rilevare la velocità  di ciascun veicolo e verificare se sia entro i limiti stabiliti per legge
+- Rilevare anomaile del traffico (auto che procedono in senso opposto a quello di marcia)
