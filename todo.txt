@@ -21,3 +21,5 @@ PROGRAMMA
   ingresso/uscita dal tratto di strada controllato)
 
 - Usa la GUI come interfaccia per il video (non usare il palyer di sistema)
+
+- Rimuovi tutti i pip dal venv e reinstalla opencv senza i pacchetti accessori 
