@@ -1,75 +1,39 @@
 import cv2
 import numpy as np
-from time import time
 
-net = cv2.dnn.readNet('yolov4-tiny.weights', 'yolov4-tiny.cfg')
+video = cv2.VideoCapture('video/camera_01.mp4')
 
-classes = []
-with open('coco.names', 'r') as f:
-    classes = f.read().splitlines()
+object_detector = cv2.createBackgroundSubtractorMOG2(history=10, varThreshold=90) # <--- THIS VALUE CAN BE DIFFERENT DEPENDING ON THE CAMERAS
 
-# print(classes)
+while True:
 
-start = time()
+    _, frame = video.read()
+    roi = frame[350: 720, 0: 600]
+    grey_frame = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    median_frame = cv2.medianBlur(grey_frame, 5)
+    expand_frame = cv2.dilate(median_frame, np.ones((5, 5)))
 
-img = cv2.imread('media/test_higway.png')
+    # roi = frame[350: 720, 0: 600]
 
-height, width, _ = img.shape
+    mask = object_detector.apply(roi)
 
-# print(height, width)
+    contours, _ = cv2.findContours(expand_frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-blob = cv2.dnn.blobFromImage(img, 1 / 255, (320, 320), (0, 0, 0), True, False)
+    # Draw contours
+    for cnt in contours:
 
-# for b in blob:
-#     for n, img_blob in enumerate(b):
-#         cv2.imshow(str(n), img_blob)
+        # Calculate areas and remove small elements
+        area = cv2.contourArea(cnt)
+        
+        # if area >= 500: # <--- THIS VALUE CAN BE DIFFERENT DEPENDING ON THE CAMERAS
+        cv2.drawContours(roi, [cnt], -1, (0, 255, 0), 2) 
 
-net.setInput(blob)
+    # cv2.imshow("Webcam", frame)
+    cv2.imshow("Media", expand_frame)
 
-output_layers_names = net.getUnconnectedOutLayersNames()
-layerOutputs = net.forward(output_layers_names)
+    key = cv2.waitKey(30)
+    if key == 27:
+        break
 
-boxes = []
-confidences = []
-class_ids = []
-
-for output in layerOutputs:
-    for detection in output:
-        scores = detection[5:]
-        class_id = np.argmax(scores)
-        confidence = scores[class_id]
-        if confidence > 0.5:
-            center_x = int(detection[0] * width)
-            center_y = int(detection[1] * height)
-            w = int(detection[2] * width)
-            h = int(detection[3] * height)
-
-            x = int(center_x - w / 2)
-            y = int(center_y - h / 2)
-
-            boxes.append([x,y,w,h])
-            confidences.append((float(confidence)))
-            class_ids.append(class_id)
-
-# print(len(boxes))
-
-indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
-# print(indexes.flatten())
-
-font = cv2.FONT_HERSHEY_DUPLEX
-# colors = np.random.uniform(0, 255, size=(len(boxes), 3))
-if len(indexes) > 0:
-    for i in indexes.flatten():
-        x, y, w, h = boxes[i]
-        label = str(classes[class_ids[i]])
-        confidence = str(round(confidences[i], 2))
-        # color = colors[i]
-        frame = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 245, 0), 2)
-        frame = cv2.putText(img, label + ' ' + confidence, (x, y + 20), font, 2, (255, 255, 255), 2)
-
-        #cv2.imwrite('frame.jpeg', frame) 
-
-
-cv2.imshow('Test', img)
-cv2.waitKey(0)
+video.release()
 cv2.destroyAllWindows()

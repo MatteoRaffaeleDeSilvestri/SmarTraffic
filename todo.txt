@@ -19,3 +19,5 @@ PROGRAMMA
   operazioni di controllo che si intende effettuare su tale video (controllo del traffico in entrata/uscita,
   controllo della velocità, tipologie di veicoli in transito, generazione di un database per ogni veicolo in
   ingresso/uscita dal tratto di strada controllato)
+
+- Usa la GUI come interfaccia per il video (non usare il palyer di sistema)

@@ -10,7 +10,7 @@ from PIL import Image
 
 # print(classes)
 
-cap = cv2.VideoCapture('video/camera_01.mp4')
+cap = cv2.VideoCapture('video/camera_04.mp4')
 
 # font = cv2.FONT_HERSHEY_DUPLEX
 

@@ -38,7 +38,7 @@ while True:
     dilatada = cv2.morphologyEx (dilat, cv2. MORPH_CLOSE , kernel)
     dilatada = cv2.morphologyEx (dilatada, cv2. MORPH_CLOSE , kernel)
     contorno,h=cv2.findContours(dilatada,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    
+
     cv2.line(frame1, (25, pos_linha), (1200, pos_linha), (255,127,0), 3) 
     for(i,c) in enumerate(contorno):
         (x,y,w,h) = cv2.boundingRect(c)
@@ -56,12 +56,12 @@ while True:
                 carros+=1
                 cv2.line(frame1, (25, pos_linha), (1200, pos_linha), (0,127,255), 3)  
                 detec.remove((x,y))
-                print("car is detected : "+str(carros))        
+                print("Car is detected : " + str(carros))        
        
     cv2.putText(frame1, "VEHICLE COUNT : "+str(carros), (450, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255),5)
     cv2.imshow("Video Original" , frame1)
     cv2.imshow("Detectar",dilatada)
-
+    
     if cv2.waitKey(1) == 27:
         break
 
