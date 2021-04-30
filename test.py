@@ -10,6 +10,9 @@ cap = cv2.VideoCapture(camera)
 # Object detection from camera
 object_detector = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=40) # <--- THIS VALUE CAN BE DIFFERENT DEPENDING ON THE CAMERAS
 
+passing_on = False
+car_id = 0
+
 while True:
 
     _, frame = cap.read()
@@ -18,12 +21,7 @@ while True:
         break
 
     frame = cv2.resize(frame, (1280, 720))
-
-    # Draw detection line on the main frame
-    cv2.line(frame, (455, 600), (640, 600), (0, 0, 255), 2)
-    # cv2.line(frame, (520, 390), (650, 390), (255, 0, 0), 1)
-    # cv2.line(frame, (300, 600), (390, 680), (0, 0, 255), 2)
-    # cv2.line(frame, (668, 400), (910, 400), (0, 0, 255), 2)
+    original = frame
 
     # Define region of interest (ROI)
     roi = frame[250 : 710, 390 : 670] # <--- THIS VALUE IS DIFFERENT DEPENDING ON THE CAMERAS
@@ -45,18 +43,27 @@ while True:
 
         if area >= 1000: # <--- THIS VALUE CAN BE DIFFERENT DEPENDING THE CAMERAS
 
-            cv2.drawContours(roi, [cnt], -1, (0, 0, 255), 1) 
+            cv2.drawContours(roi, [cnt], -1, (0, 255, 0), 1) 
             x, y, w, h = cv2.boundingRect(cnt)
             # cv2.rectangle(roi, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
             # Animate detection point
             if 600 in range(x + 470, y + 470):
-                cv2.line(frame, (455, 600), (640, 600), (255, 255, 255), 2)
+                passing_on = True
 
-            # if y + h == 470 and not os.path.isfile('photos/Detection{}.png'.format(car_id - 1)):
-            #         cv2.imwrite('photos/Detection{}.png'.format(car_id), frame[250 : 720, 390 : 670])
-            #         car_id += 1
+            # if y + h >= 470:
+            #     cv2.imwrite('detection{}.png'.format(car_id), frame[250 : 720, 390 : 670])
+            #     car_id += 1
 
+    if passing_on:
+        if not os.path.isfile('detections/detection{}.png'.format(car_id - 1)):
+            cv2.imwrite('detections/detection{}.png'.format(car_id), original[250 : 720, 390 : 670])
+            car_id += 1
+        cv2.line(frame, (455, 600), (640, 600), (255, 255, 255), 2)
+    else:
+        cv2.line(frame, (455, 600), (640, 600), (0, 0, 255), 2)
+        passing_on = False
+    
     # Show the video (and layer)
     cv2.imshow(camera[6 : len(camera) - 4], frame)
     cv2.imshow('ROI {}'.format(camera[6 : len(camera) - 4]), mask)
