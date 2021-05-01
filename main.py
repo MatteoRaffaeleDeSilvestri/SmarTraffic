@@ -196,12 +196,14 @@ class Video:
 
 if __name__ == '__main__':
 
+    # Prepare the object recognition system (YOLOv4)
     net = cv2.dnn.readNet('yolov4.weights', 'yolov4.cfg')
     
     classes = list()
     with open('coco.names', 'r') as f:
         classes = f.read().splitlines()
 
+    
     source = 'video/drone.mp4'
     
     vid = Video(net, classes, source)
