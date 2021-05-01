@@ -11,4 +11,5 @@
 /yolov4.cfg
 /yolov4.weights
 output.mp4
-detections/detection0.png
+/detections
+/analysed
