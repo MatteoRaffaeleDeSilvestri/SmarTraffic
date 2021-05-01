@@ -38,7 +38,7 @@ class Video:
             _, frame = cap.read()
 
             if frame is None:
-                print("Video ended")
+                # print("Video ended")
                 break
             
             start_update = time()
@@ -91,14 +91,14 @@ class Video:
                 break
 
             # Update data on the screen every second
-            end = time()
-            update_interval += end - start_update
+            end_update = time()
+            update_interval += end_update - start_update
             if update_interval >= 1:
-                FPS = int(1 / round(end - start_update, 3))
+                FPS = int(1 / round(end_update - start_update, 3))
                 update_interval = 0
-            
-            cv2.putText(frame, 'FPS: {}'.format(FPS), (10, 40), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 2)
-            cv2.putText(frame, 'Vehicles: {}'.format(count), (10, 80), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 2)
+            cv2.rectangle(frame, (5, 5), (250, 120), (50, 50, 50), -1)
+            cv2.putText(frame, 'FPS: {}'.format(FPS), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
+            cv2.putText(frame, 'Vehicles: {}'.format(count), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
 
             # Show the video (and layer)
             # cv2.imshow(camera[6 : len(camera) - 4], frame)
@@ -107,7 +107,7 @@ class Video:
             
         cap.release()
         cv2.destroyAllWindows()
-        capture.close()
+        show.close()
 
     def detector(self):
 
@@ -165,33 +165,33 @@ class Video:
                     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
                     # print(indexes.flatten())
 
-                    font = cv2.FONT_HERSHEY_PLAIN
-                    colors = np.random.uniform(0, 255, size=(len(boxes), 3))
-
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    
                     if len(indexes) > 0:
                         for i in indexes.flatten():
                             x, y, w, h = boxes[i]
                             label = str(self.classes[class_ids[i]])
                             confidence = str(round(confidences[i] * 100, 1)) + '%'
-                            color = colors[i]
                             img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
                             img = cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
                             img = cv2.putText(img, label + ' ' + confidence, (x, y - 5), font, 1, (10, 10, 10), 1)
                             cv2.putText(img, '', (x, y + 20), font, 2, (255, 255, 255), 1)
-                            # print(x, y, w, h)
-                            cv2.imwrite('analysed/{}'.format(photo), img[y - 30 : y + h + 30, x - 30 : x + w + 30])
                     
-                    os.remove('detections/{}'.format(photo))
-                            
                     # cv2.imshow('Image', img)
                     # end = time()
                     # print(end - start)
                     
                     # cv2.waitKey(0)
                     # cv2.destroyAllWindows()
+
+                # Save new (generated) photo
+                cv2.imwrite('analysed/{}.png'.format(len(os.listdir('analysed')) + 1), img[y - 30 : y + h + 30, x - 30 : x + w + 30])
+                
+                # Delete analized photos
+                os.remove('detections/{}'.format(photo))
             
             else:
-                # print('Empty folder')
+                ''' Set a dynamic value for sleep '''
                 sleep(5)
 
 if __name__ == '__main__':
@@ -203,20 +203,24 @@ if __name__ == '__main__':
     with open('coco.names', 'r') as f:
         classes = f.read().splitlines()
 
-    
+    # Take video frome source (GUI)
     source = 'video/drone.mp4'
     
     vid = Video(net, classes, source)
     
     # Initialize process
-    capture = multiprocessing.Process(target=vid.play)
+    show = multiprocessing.Process(target=vid.play)
     detect = multiprocessing.Process(target=vid.detector)
 
     # Starting multiprocessing procedure
     detect.start()
-    capture.start()
+    show.start()
 
     while True:
-        if not capture.is_alive():
-            detect.kill()
-            break
+        # print(bool(show.is_alive), len(os.listdir('detections')))
+        ''' Close this loop after analyzing all the images in detected folder '''
+        if not bool(show.is_alive()):
+            if not len(os.listdir('detections')):
+                detect.kill()
+                break
+        sleep(10)
