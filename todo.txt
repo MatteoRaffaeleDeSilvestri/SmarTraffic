@@ -26,3 +26,5 @@ PROGRAMMA
 
 - Riorganizza il codice in maniera più ordinata
 - Ottimizza il programma portando fuori dai loop le istruzioni ricorrenti
+- Rivedi gli import ad inizio file
+- Setta un delay dinamico in base al traffico su quanto frequentemente vengono analizzate le foto in detected
