@@ -13,3 +13,5 @@
 output.mp4
 /detections
 /analysed
+vehicle_counting /main.py
+__pycache__/utilities.cpython-38.pyc

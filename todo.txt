@@ -26,3 +26,5 @@ PROGRAMMA
 - Crea una procedura di sicurezza per interrompere istantaneamente i processi creati
 
 - Crea immagine modello 
+
+- Gestisci le interruzioni improvvise ai filmati

@@ -12,8 +12,6 @@ class Video:
         self.net = net
         
         self.classes = classes
-        with open('coco.names', 'r') as f:
-            self.classes = f.read().splitlines()
 
         self.camera = source
          
@@ -24,9 +22,9 @@ class Video:
         cap = cv2.VideoCapture(source)
        
         # Cam variables
-        passing_on = False
-        car_id = 0
-        count = 0
+        passing_IN = False
+        vehicle_ID = 0
+        vehicle_count = 0
         update_interval = 0
         FPS = '-'
 
@@ -73,17 +71,17 @@ class Video:
 
                     # Animate detection point
                     if 600 in range(150 + y, 150 + y + h):
-                        passing_on = True
+                        passing_IN = True
             
-            if passing_on:
-                if not os.path.isfile('detections/{}.png'.format(car_id)):
-                    count += 1
-                    cv2.imwrite('detections/{}.png'.format(car_id), original[150 : 710, 400 : 700])
+            if passing_IN:
+                if not os.path.isfile('detections/{}_IN.png'.format(vehicle_ID)):
+                    vehicle_count += 1
+                    cv2.imwrite('detections/{}_IN.png'.format(vehicle_ID), original[150 : 710, 400 : 700])
                 cv2.line(frame, (455, 600), (640, 600), (255, 255, 255), 2)
-                passing_on = False
+                passing_IN = False
             else:
                 cv2.line(frame, (455, 600), (640, 600), (0, 0, 255), 2)
-                car_id += 1
+                vehicle_ID += 1
 
             # Wait foe ESC key to stop
             key = cv2.waitKey(30)
@@ -98,7 +96,7 @@ class Video:
                 update_interval = 0
             cv2.rectangle(frame, (5, 5), (250, 120), (50, 50, 50), -1)
             cv2.putText(frame, 'FPS: {}'.format(FPS), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
-            cv2.putText(frame, 'Vehicles: {}'.format(count), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
+            cv2.putText(frame, 'Vehicles: {}'.format(vehicle_count), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
 
             # Show the video (and layer)
             # cv2.imshow(camera[6 : len(camera) - 4], frame)
