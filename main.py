@@ -4,6 +4,7 @@ from PIL import Image
 from time import time, sleep
 import os
 import multiprocessing
+import shutil
 
 class Video:
 
@@ -69,10 +70,10 @@ class Video:
 
                     # Animate detection point
                     if 500 in range(300 + y, 300 + y + h):
-                        if x + ((x + w) / 2) > 250:
-                            det.append((vehicle_ID, '_OUT'))
-                        else:
+                        if 0 < x + w <= 250:
                             det.append((vehicle_ID, '_IN'))
+                        elif 251 < x <= 500:
+                            det.append((vehicle_ID, '_OUT'))
                         passing_on = True
 
             if passing_on:
@@ -80,14 +81,12 @@ class Video:
                     if not os.path.isfile('detections/{}.png'.format(str(data[0]) + data[1])):
                         vehicle_count += 1
                         cv2.imwrite('detections/{}.png'.format(str(data[0]) + data[1]), original[300 : 700, 400 : 900])
-                        cv2.line(frame, (485, 500), (810, 500), (255, 255, 255), 2)
+                    cv2.line(frame, (485, 500), (810, 500), (255, 255, 255), 2)
                     det.remove(data)
                 passing_on = False
             else:
                 vehicle_ID += 1
                 cv2.line(frame, (485, 500), (810, 500), (0, 0, 255), 2)
-                
-            cv2.line(frame, (485, 500), (810, 500), (0, 0, 255), 2)
             
             # Wait foe ESC key to stop
             key = cv2.waitKey(30)
@@ -119,7 +118,7 @@ class Video:
             if len(os.listdir('detections')):
 
                 for photo in os.listdir('detections'):
-
+                    
                     img = cv2.imread('detections/{}'.format(str(photo)))
                     height, width, _ = img.shape
 
@@ -165,17 +164,23 @@ class Video:
                             x, y, w, h = boxes[i]
                             label = str(self.classes[class_ids[i]])
                             confidence = str(round(confidences[i] * 100, 1)) + '%'
-                            img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                            img = cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
-                            img = cv2.putText(img, label + ' ' + confidence, (x, y - 5), font, 1, (10, 10, 10), 1)
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                            cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
+                            cv2.putText(img, label + ' ' + confidence, (x, y - 5), font, 1, (10, 10, 10), 1)
                             cv2.putText(img, '', (x, y + 20), font, 2, (255, 255, 255), 1)
 
-                # Save new (generated) photo
-                cv2.imwrite('analysed/{}.png'.format(len(os.listdir('analysed')) + 1), img[y - 30 : y + h + 30, x - 30 : x + w + 30])
+                try:
+                    # Save new (generated) photo
+                    cv2.imwrite('analysed/{}.png'.format(len(os.listdir('analysed')) + 1), img[y - 30 : y + h + 30, x - 30 : x + w + 30])
                 
-                # Delete analized photos
-                os.remove('detections/{}'.format(photo))
-            
+                    # Delete analized photos
+                    os.remove('detections/{}'.format(photo))
+                except Exception as e:
+                    print(e)
+                    
+                    # Move file
+                    shutil.move('detections/{}'.format(photo), 'tmp')
+                    
             else:
                 ''' Set a dynamic value for sleep '''
                 sleep(5)
@@ -199,7 +204,7 @@ if __name__ == '__main__':
     detect = multiprocessing.Process(target=vid.detector)
 
     # Starting multiprocessing procedure
-    # detect.start()
+    detect.start()
     show.start()
 
     while True:
@@ -207,6 +212,5 @@ if __name__ == '__main__':
         ''' Close this loop after analyzing all the images in detected folder '''
         if not show.is_alive():
             if not len(os.listdir('detections')):
-        #       detect.kill()
-                os.kill(show.pid, 9)
+                os.kill(detect.pid, 9)
         sleep(5)

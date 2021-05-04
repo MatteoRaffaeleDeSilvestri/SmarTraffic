@@ -15,3 +15,5 @@ output.mp4
 /analysed
 vehicle_counting /main.py
 __pycache__/utilities.cpython-38.pyc
+tmp/1328_IN.png
+tmp/1328_OUT.png
