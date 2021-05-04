@@ -23,8 +23,8 @@ class Video:
         cap = cv2.VideoCapture(source)
        
         # Cam variables
-        det = list()
-        passing_on = True
+        passing_SX = False
+        passing_DX = False
         vehicle_ID = 0
         vehicle_count = 0
         update_interval = 0
@@ -38,7 +38,9 @@ class Video:
             _, frame = cap.read()
 
             if frame is None:
-                break
+                cap.release()
+                cv2.destroyAllWindows()
+                os.kill(show.pid, 9)
             
             start_update = time()
 
@@ -46,20 +48,25 @@ class Video:
             original = cv2.resize(frame, (1280, 720))
             
             # Define region of interest (ROI)
-            roi = frame[300 : 700, 400 : 900]
+            roi_SX = frame[300 : 700, 400 : 650]
+            roi_DX = frame[300 : 700, 650 : 900]
 
             # Generate mask for object
-            mask = object_detector.apply(roi)
+            mask_SX = object_detector.apply(roi_SX)
+            mask_DX = object_detector.apply(roi_DX)
 
             # Remove shadow and expand detection in the image
-            _, mask = cv2.threshold(mask, 254, 255, cv2.THRESH_BINARY)
-            mask = cv2.dilate(mask, np.ones((5, 5)))
+            _, mask_SX = cv2.threshold(mask_SX, 254, 255, cv2.THRESH_BINARY)
+            mask_SX = cv2.dilate(mask_SX, np.ones((5, 5)))
+            _, mask_DX = cv2.threshold(mask_DX, 254, 255, cv2.THRESH_BINARY)
+            mask_DX = cv2.dilate(mask_DX, np.ones((5, 5)))
             
             # Find contours for moving object
-            contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            contours_SX, _ = cv2.findContours(mask_SX, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            contours_DX, _ = cv2.findContours(mask_DX, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             
             # Draw contours
-            for cnt in contours:
+            for cnt in contours_SX:
 
                 # Calculate areas and remove small elements
                 if cv2.contourArea(cnt) >= 1000:
@@ -70,27 +77,45 @@ class Video:
 
                     # Animate detection point
                     if 500 in range(300 + y, 300 + y + h):
-                        if 0 < x + w <= 250:
-                            det.append((vehicle_ID, '_IN'))
-                        elif 251 < x <= 500:
-                            det.append((vehicle_ID, '_OUT'))
-                        passing_on = True
+                        passing_SX = True
+        
+            for cnt in contours_DX:
 
-            if passing_on:
-                for data in det:
-                    if not os.path.isfile('detections/{}.png'.format(str(data[0]) + data[1])):
-                        vehicle_count += 1
-                        cv2.imwrite('detections/{}.png'.format(str(data[0]) + data[1]), original[300 : 700, 400 : 900])
-                    cv2.line(frame, (485, 500), (810, 500), (255, 255, 255), 2)
-                    det.remove(data)
-                passing_on = False
-            else:
+                # Calculate areas and remove small elements
+                if cv2.contourArea(cnt) >= 1000:
+                    
+                    x, y, w, h = cv2.boundingRect(cnt)
+                    # cv2.drawContours(roi, [cnt], -1, (0, 255, 0), 2) 
+                    # cv2.rectangle(roi, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+                    # Animate detection point
+                    if 500 in range(300 + y, 300 + y + h):
+                        passing_DX = True
+
+            cv2.line(frame, (485, 500), (810, 500), (0, 0, 255), 2)
+            if passing_SX:
+                if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID) + '_IN')):
+                    vehicle_count += 1
+                    cv2.imwrite('detections/{}.png'.format(str(vehicle_ID) + '_IN'), original[300 : 700, 400 : 650])
+                cv2.line(frame, (485, 500), (647, 500), (255, 255, 255), 2)
+            
+            if passing_DX:
+                if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID) + '_OUT')):
+                    vehicle_count += 1
+                    cv2.imwrite('detections/{}.png'.format(str(vehicle_ID) + '_OUT'), original[300 : 700, 650 : 900])
+                cv2.line(frame, (647, 500), (810, 500), (255, 255, 255), 2)
+                
+            if not passing_SX and not passing_DX:
                 vehicle_ID += 1
-                cv2.line(frame, (485, 500), (810, 500), (0, 0, 255), 2)
+            
+            passing_SX = False
+            passing_DX = False
             
             # Wait foe ESC key to stop
             key = cv2.waitKey(30)
             if key == 27:
+                cap.release()
+                cv2.destroyAllWindows()
                 os.kill(show.pid, 9)
 
             # Update data on the screen every second
@@ -104,12 +129,9 @@ class Video:
             cv2.putText(frame, 'Vehicles: {}'.format(vehicle_count), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
 
             # Show the video (and layer)
-            cv2.imshow('ROI', roi)
-            # cv2.imshow(source[6 : len(source) - 4], frame)
-            
-        cap.release()
-        cv2.destroyAllWindows()
-        os.kill(show.pid, 9)
+            # cv2.imshow('Left lane', mask_SX)
+            # cv2.imshow('Right lane', mask_DX)
+            cv2.imshow(source[6 : len(source) - 4], frame)
 
     def detector(self):
 
@@ -156,8 +178,6 @@ class Video:
                                 class_ids.append(class_id)
 
                     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
-
-                    font = cv2.FONT_HERSHEY_SIMPLEX
                     
                     if len(indexes) > 0:
                         for i in indexes.flatten():
@@ -165,22 +185,16 @@ class Video:
                             label = str(self.classes[class_ids[i]])
                             confidence = str(round(confidences[i] * 100, 1)) + '%'
                             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                            cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
-                            cv2.putText(img, label + ' ' + confidence, (x, y - 5), font, 1, (10, 10, 10), 1)
-                            cv2.putText(img, '', (x, y + 20), font, 2, (255, 255, 255), 1)
+                            # cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
+                            # cv2.putText(img, label + ' ' + confidence, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
+                            # cv2.putText(img, '', (x, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 1)
 
-                try:
-                    # Save new (generated) photo
-                    cv2.imwrite('analysed/{}.png'.format(len(os.listdir('analysed')) + 1), img[y - 30 : y + h + 30, x - 30 : x + w + 30])
-                
-                    # Delete analized photos
-                    os.remove('detections/{}'.format(photo))
-                except Exception as e:
-                    print(e)
-                    
-                    # Move file
-                    shutil.move('detections/{}'.format(photo), 'tmp')
-                    
+                            # Save new (generated) photo
+                            cv2.imwrite('analysed/{}.png'.format(len(os.listdir('analysed')) + 1), img[y - 30 : y + h + 30, x - 30 : x + w + 30])
+                        
+                            # Delete analized photos
+                            os.remove('detections/{}'.format(photo))
+                        
             else:
                 ''' Set a dynamic value for sleep '''
                 sleep(5)
@@ -204,13 +218,11 @@ if __name__ == '__main__':
     detect = multiprocessing.Process(target=vid.detector)
 
     # Starting multiprocessing procedure
-    detect.start()
+    # detect.start()
     show.start()
 
     while True:
-        # print(bool(show.is_alive), len(os.listdir('detections')))
-        ''' Close this loop after analyzing all the images in detected folder '''
-        if not show.is_alive():
-            if not len(os.listdir('detections')):
-                os.kill(detect.pid, 9)
+        if not show.is_alive() and not len(os.listdir('detections')):
+            os.kill(detect.pid, 9)
+            break
         sleep(5)

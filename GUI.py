@@ -1,3 +1,6 @@
 import tkinter as tk
 
-print('tkinter')
+window = tk.Tk()
+window.geometry('1500x900')
+
+window.mainloop()
