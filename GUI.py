@@ -1,6 +1,14 @@
 import tkinter as tk
 
-window = tk.Tk()
-window.geometry('1500x900')
+class GUI:
+    
+    def __init__(self):
+        
+        root = tk.Tk()
+        root.geometry('1500x900')
+        root.title('Traffic Eye')
+        root.mainloop()
 
-window.mainloop()
+if __name__ == '__main__':
+    
+    x = GUI()

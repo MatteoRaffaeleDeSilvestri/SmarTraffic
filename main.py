@@ -8,11 +8,14 @@ import shutil
 
 class Video:
 
-    def __init__(self, net, classes, source):
+    def __init__(self, source):
 
-        self.net = net
-        
-        self.classes = classes
+        # Prepare the object recognition system (YOLOv4)
+        self.net = cv2.dnn.readNet('yolov4.weights', 'yolov4.cfg')
+    
+        self.classes = list()
+        with open('coco.names', 'r') as f:
+            self.classes = f.read().splitlines()
 
         self.camera = source
          
@@ -26,7 +29,8 @@ class Video:
         passing_SX = False
         passing_DX = False
         vehicle_ID = 0
-        vehicle_count = 0
+        vehicle_count_SX = 0
+        vehicle_count_DX = 0
         update_interval = 0
         FPS = '-'
 
@@ -66,26 +70,26 @@ class Video:
             contours_DX, _ = cv2.findContours(mask_DX, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             
             # Draw contours
-            for cnt in contours_SX:
+            for contours in contours_SX:
 
                 # Calculate areas and remove small elements
-                if cv2.contourArea(cnt) >= 1000:
+                if cv2.contourArea(contours) >= 1000:
                     
-                    x, y, w, h = cv2.boundingRect(cnt)
-                    # cv2.drawContours(roi, [cnt], -1, (0, 255, 0), 2) 
+                    x, y, w, h = cv2.boundingRect(contours)
+                    # cv2.drawContours(roi, [contours], -1, (0, 255, 0), 2) 
                     # cv2.rectangle(roi, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                     # Animate detection point
                     if 500 in range(300 + y, 300 + y + h):
                         passing_SX = True
         
-            for cnt in contours_DX:
+            for contours in contours_DX:
 
                 # Calculate areas and remove small elements
-                if cv2.contourArea(cnt) >= 1000:
+                if cv2.contourArea(contours) >= 1000:
                     
-                    x, y, w, h = cv2.boundingRect(cnt)
-                    # cv2.drawContours(roi, [cnt], -1, (0, 255, 0), 2) 
+                    x, y, w, h = cv2.boundingRect(contours)
+                    # cv2.drawContours(roi, [contours], -1, (0, 255, 0), 2) 
                     # cv2.rectangle(roi, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                     # Animate detection point
@@ -95,13 +99,13 @@ class Video:
             cv2.line(frame, (485, 500), (810, 500), (0, 0, 255), 2)
             if passing_SX:
                 if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID) + '_IN')):
-                    vehicle_count += 1
+                    vehicle_count_SX += 1
                     cv2.imwrite('detections/{}.png'.format(str(vehicle_ID) + '_IN'), original[300 : 700, 400 : 650])
                 cv2.line(frame, (485, 500), (647, 500), (255, 255, 255), 2)
             
             if passing_DX:
                 if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID) + '_OUT')):
-                    vehicle_count += 1
+                    vehicle_count_DX += 1
                     cv2.imwrite('detections/{}.png'.format(str(vehicle_ID) + '_OUT'), original[300 : 700, 650 : 900])
                 cv2.line(frame, (647, 500), (810, 500), (255, 255, 255), 2)
                 
@@ -124,9 +128,10 @@ class Video:
             if update_interval >= 1:
                 FPS = int(1 / round(end_update - start_update, 3))
                 update_interval = 0
-            cv2.rectangle(frame, (5, 5), (250, 120), (50, 50, 50), -1)
-            cv2.putText(frame, 'FPS: {}'.format(FPS), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
-            cv2.putText(frame, 'Vehicles: {}'.format(vehicle_count), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
+            cv2.rectangle(frame, (5, 5), (250, 110), (50, 50, 50), -1)
+            cv2.putText(frame, 'FPS: {}'.format(FPS), (10, 35), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
+            cv2.putText(frame, 'Vehicle SX: {}'.format(vehicle_count_SX), (10, 65), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
+            cv2.putText(frame, 'Vehicle DX: {}'.format(vehicle_count_DX), (10, 95), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
 
             # Show the video (and layer)
             # cv2.imshow('Left lane', mask_SX)
@@ -141,22 +146,22 @@ class Video:
 
                 for photo in os.listdir('detections'):
                     
-                    img = cv2.imread('detections/{}'.format(str(photo)))
+                    img = cv2.imread('detections/{}'.format(photo))
                     height, width, _ = img.shape
 
                     blob = cv2.dnn.blobFromImage(img, 1 / 255, (320, 320), (0, 0, 0), True, False)
-
+ 
                     self.net.setInput(blob)
-
+ 
                     output_layers_names = self.net.getUnconnectedOutLayersNames()
                     layerOutputs = self.net.forward(output_layers_names)
-
+ 
                     boxes = []
                     confidences = []
                     class_ids = []
-
+ 
                     for output in layerOutputs:
-
+ 
                         for detection in output:
                         
                             scores = detection[5:]
@@ -184,44 +189,46 @@ class Video:
                             x, y, w, h = boxes[i]
                             label = str(self.classes[class_ids[i]])
                             confidence = str(round(confidences[i] * 100, 1)) + '%'
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                            # cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
-                            # cv2.putText(img, label + ' ' + confidence, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
-                            # cv2.putText(img, '', (x, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 1)
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
+                            cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
+                            cv2.putText(img, label + ' ' + confidence, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
+                            cv2.putText(img, '', (x, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 1)
+                    else:
 
-                            # Save new (generated) photo
-                            cv2.imwrite('analysed/{}.png'.format(len(os.listdir('analysed')) + 1), img[y - 30 : y + h + 30, x - 30 : x + w + 30])
-                        
-                            # Delete analized photos
-                            os.remove('detections/{}'.format(photo))
-                        
+                        ''' Manage this situation: no object detected '''
+                        # Delete analized photos
+                        os.remove('detections/{}'.format(photo))
+
+                    # Save new (generated) photo
+                    cv2.imwrite('analysed/{}.png'.format(len(os.listdir('analysed')) + 1), img)
+                    
+                    try:
+                        # Delete analized photos
+                        os.remove('detections/{}'.format(photo))
+                    except Exception:
+                        pass
+
             else:
                 ''' Set a dynamic value for sleep '''
                 sleep(5)
 
 if __name__ == '__main__':
 
-    # Prepare the object recognition system (YOLOv4)
-    net = cv2.dnn.readNet('yolov4.weights', 'yolov4.cfg')
-    
-    classes = list()
-    with open('coco.names', 'r') as f:
-        classes = f.read().splitlines()
-
     # Take video frome source (GUI)
     source = 'video/drone.mp4'
     
-    vid = Video(net, classes, source)
+    vid = Video(source)
     
     # Initialize process
     show = multiprocessing.Process(target=vid.play)
     detect = multiprocessing.Process(target=vid.detector)
 
     # Starting multiprocessing procedure
-    # detect.start()
+    detect.start()
     show.start()
 
     while True:
+        ''' Ottimizza questo ciclo ''' 
         if not show.is_alive() and not len(os.listdir('detections')):
             os.kill(detect.pid, 9)
             break
