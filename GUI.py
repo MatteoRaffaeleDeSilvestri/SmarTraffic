@@ -6,7 +6,7 @@ class GUI:
         
         root = tk.Tk()
         root.geometry('1500x900')
-        root.title('Traffic Eye')
+        root.title('Smart Traffic')
         root.mainloop()
 
 if __name__ == '__main__':

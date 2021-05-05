@@ -4,7 +4,6 @@ from PIL import Image
 from time import time, sleep
 import os
 import multiprocessing
-import shutil
 
 class Video:
 
@@ -28,7 +27,8 @@ class Video:
         # Cam variables
         passing_SX = False
         passing_DX = False
-        vehicle_ID = 0
+        vehicle_ID_SX = 0
+        vehicle_ID_DX = 0
         vehicle_count_SX = 0
         vehicle_count_DX = 0
         update_interval = 0
@@ -98,19 +98,20 @@ class Video:
 
             cv2.line(frame, (485, 500), (810, 500), (0, 0, 255), 2)
             if passing_SX:
-                if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID) + '_IN')):
+                if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID_SX) + '_IN')):
                     vehicle_count_SX += 1
-                    cv2.imwrite('detections/{}.png'.format(str(vehicle_ID) + '_IN'), original[300 : 700, 400 : 650])
+                    cv2.imwrite('detections/{}.png'.format(str(vehicle_ID_SX) + '_IN'), original[300 : 700, 400 : 650])
                 cv2.line(frame, (485, 500), (647, 500), (255, 255, 255), 2)
             
             if passing_DX:
-                if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID) + '_OUT')):
+                if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID_DX) + '_OUT')):
                     vehicle_count_DX += 1
-                    cv2.imwrite('detections/{}.png'.format(str(vehicle_ID) + '_OUT'), original[300 : 700, 650 : 900])
+                    cv2.imwrite('detections/{}.png'.format(str(vehicle_ID_DX) + '_OUT'), original[300 : 700, 650 : 900])
                 cv2.line(frame, (647, 500), (810, 500), (255, 255, 255), 2)
                 
             if not passing_SX and not passing_DX:
-                vehicle_ID += 1
+                vehicle_ID_SX += 1
+                vehicle_ID_DX += 1
             
             passing_SX = False
             passing_DX = False
@@ -193,21 +194,13 @@ class Video:
                             cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
                             cv2.putText(img, label + ' ' + confidence, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
                             cv2.putText(img, '', (x, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 1)
-                    else:
-
-                        ''' Manage this situation: no object detected '''
-                        # Delete analized photos
-                        os.remove('detections/{}'.format(photo))
 
                     # Save new (generated) photo
                     cv2.imwrite('analysed/{}.png'.format(len(os.listdir('analysed')) + 1), img)
                     
-                    try:
-                        # Delete analized photos
-                        os.remove('detections/{}'.format(photo))
-                    except Exception:
-                        pass
-
+                    # Delete analized photos
+                    os.remove('detections/{}'.format(photo))
+                    
             else:
                 ''' Set a dynamic value for sleep '''
                 sleep(5)
