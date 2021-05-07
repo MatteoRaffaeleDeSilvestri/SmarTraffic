@@ -5,6 +5,9 @@ from time import time, sleep
 import os
 import multiprocessing
 
+# Global variable
+DETECTION_POINT = True
+
 class Video:
 
     def __init__(self, source):
@@ -27,15 +30,14 @@ class Video:
         # Cam variables
         passing_SX = False
         passing_DX = False
-        vehicle_ID_SX = 0
-        vehicle_ID_DX = 0
+        vehicle_ID = 0
         vehicle_count_SX = 0
         vehicle_count_DX = 0
         update_interval = 0
         FPS = '-'
 
         # Object detection from camera
-        object_detector = cv2.createBackgroundSubtractorMOG2(history=120, varThreshold=180)
+        object_detector = cv2.createBackgroundSubtractorMOG2(history=150, varThreshold=200)
 
         while True:
 
@@ -48,8 +50,8 @@ class Video:
             
             start_update = time()
 
-            frame = cv2.resize(frame, (1280, 720))
-            original = cv2.resize(frame, (1280, 720))
+            frame = cv2.resize(frame, (1280, 810))
+            original = cv2.resize(frame, (1280, 810))
             
             # Define region of interest (ROI)
             roi_SX = frame[300 : 700, 400 : 650]
@@ -96,22 +98,22 @@ class Video:
                     if 500 in range(300 + y, 300 + y + h):
                         passing_DX = True
 
-            cv2.line(frame, (485, 500), (810, 500), (0, 0, 255), 2)
+            if DETECTION_POINT: cv2.line(frame, (320, 600), (1000, 600), (0, 0, 255), 2)
+            
             if passing_SX:
-                if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID_SX) + '_IN')):
+                if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID) + '_IN')):
                     vehicle_count_SX += 1
-                    cv2.imwrite('detections/{}.png'.format(str(vehicle_ID_SX) + '_IN'), original[300 : 700, 400 : 650])
-                cv2.line(frame, (485, 500), (647, 500), (255, 255, 255), 2)
+                    cv2.imwrite('detections/{}.png'.format(str(vehicle_ID) + '_IN'), original[300 : 700, 400 : 650])
+                if DETECTION_POINT: cv2.line(frame, (320, 600), (660, 600), (255, 255, 255), 2)
             
             if passing_DX:
-                if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID_DX) + '_OUT')):
+                if not os.path.isfile('detections/{}.png'.format(str(vehicle_ID) + '_OUT')):
                     vehicle_count_DX += 1
-                    cv2.imwrite('detections/{}.png'.format(str(vehicle_ID_DX) + '_OUT'), original[300 : 700, 650 : 900])
-                cv2.line(frame, (647, 500), (810, 500), (255, 255, 255), 2)
+                    cv2.imwrite('detections/{}.png'.format(str(vehicle_ID) + '_OUT'), original[300 : 700, 650 : 900])
+                if DETECTION_POINT: cv2.line(frame, (660, 600), (1000, 600), (255, 255, 255), 2)
                 
             if not passing_SX and not passing_DX:
-                vehicle_ID_SX += 1
-                vehicle_ID_DX += 1
+                vehicle_ID += 1
             
             passing_SX = False
             passing_DX = False
@@ -135,8 +137,8 @@ class Video:
             cv2.putText(frame, 'Vehicle DX: {}'.format(vehicle_count_DX), (10, 95), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
 
             # Show the video (and layer)
-            # cv2.imshow('Left lane', mask_SX)
-            # cv2.imshow('Right lane', mask_DX)
+            cv2.imshow('Left lane', mask_SX)
+            cv2.imshow('Right lane', mask_DX)
             cv2.imshow(source[6 : len(source) - 4], frame)
 
     def detector(self):
@@ -208,7 +210,8 @@ class Video:
 if __name__ == '__main__':
 
     # Take video frome source (GUI)
-    source = 'video/drone.mp4'
+    # source = 'video/drone.mp4'
+    source = 'video/SPFS.mp4'
     
     vid = Video(source)
     
@@ -217,7 +220,7 @@ if __name__ == '__main__':
     detect = multiprocessing.Process(target=vid.detector)
 
     # Starting multiprocessing procedure
-    detect.start()
+    # detect.start()
     show.start()
 
     while True:
