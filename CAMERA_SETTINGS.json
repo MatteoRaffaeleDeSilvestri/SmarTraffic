@@ -1,0 +1,17 @@
+{
+    "camera_1" : {
+        "title" : "Via Fondi-Sperlonga",
+        "history" : 90,
+        "varThreshold" : 120,
+        "roi_SX" : [200, 700, 250, 640],
+        "roi_DX" : [200, 700, 660, 1050],
+        "area" : 1000,
+        "detection_point" : [330, 500, 990, 500],
+        "photo_SX" : [200, 700, 250, 690],
+        "photo_DX" : [200, 700, 650, 1050]
+    },
+
+    "camera_2" : 0,
+    "camera_3" : 0,
+    "camera_4" : 0
+}

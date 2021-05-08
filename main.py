@@ -4,9 +4,11 @@ from PIL import Image
 from time import time, sleep
 import os
 import multiprocessing
+import json
 
 # Global variable
 DETECTION_POINT = True
+CAMERA_SETTINGS = None
 
 class Video:
 
@@ -25,7 +27,7 @@ class Video:
 
         # Take video frome source 
         source = self.camera
-        cap = cv2.VideoCapture(source)
+        capture = cv2.VideoCapture(source)
        
         # Cam variables
         passing_SX = False
@@ -37,14 +39,14 @@ class Video:
         FPS = '-'
 
         # Object detection from camera
-        object_detector = cv2.createBackgroundSubtractorMOG2(history=90, varThreshold=120)
+        object_detector = cv2.createBackgroundSubtractorMOG2(CAMERA_SETTINGS[source[6 : len(source) - 4]]["history"], CAMERA_SETTINGS[source[6 : len(source) - 4]]["varThreshold"])
 
         while True:
 
-            _, frame = cap.read()
+            _, frame = capture.read()
 
             if frame is None:
-                cap.release()
+                capture.release()
                 cv2.destroyAllWindows()
                 os.kill(show.pid, 9)
             
@@ -54,8 +56,10 @@ class Video:
             original = cv2.resize(frame, (1280, 810))
             
             # Define region of interest (ROI)
-            roi_SX = frame[200 : 700, 250 : 640]
-            roi_DX = frame[200 : 700, 660 : 1050]
+            roi_SX = frame[CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_SX"][1],
+                           CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_SX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_SX"][3]]
+            roi_DX = frame[CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_DX"][1],
+                           CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_DX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_DX"][3]]
 
             # Generate mask for object
             mask_SX = object_detector.apply(roi_SX)
@@ -63,9 +67,7 @@ class Video:
 
             # Remove shadow and expand detection in the image
             _, mask_SX = cv2.threshold(mask_SX, 254, 255, cv2.THRESH_BINARY)
-            # mask_SX = cv2.dilate(mask_SX, np.ones((5, 5)))
             _, mask_DX = cv2.threshold(mask_DX, 254, 255, cv2.THRESH_BINARY)
-            # mask_DX = cv2.dilate(mask_DX, np.ones((5, 5)))
 
             # Find contours for moving object
             contours_SX, _ = cv2.findContours(mask_SX, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -75,42 +77,47 @@ class Video:
             for contours in contours_SX:
 
                 # Calculate areas and remove small elements
-                if cv2.contourArea(contours) >= 1000:
+                if cv2.contourArea(contours) >= CAMERA_SETTINGS[source[6 : len(source) - 4]]["area"]:
                     
                     x, y, w, h = cv2.boundingRect(contours)
-                    # cv2.drawContours(roi_SX, [contours], -1, (0, 255, 0), 2) 
-                    # cv2.rectangle(roi_SX, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                     # Animate detection point
-                    if 500 in range(200 + y, 200 + y + h):
+                    if CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][1] in range(CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_SX"][0] + y, CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_SX"][0] + y + h):
                         passing_SX = True
 
             for contours in contours_DX:
 
                 # Calculate areas and remove small elements
-                if cv2.contourArea(contours) >= 1000:
+                if cv2.contourArea(contours) >= CAMERA_SETTINGS[source[6 : len(source) - 4]]["area"]:
                     
                     x, y, w, h = cv2.boundingRect(contours)
-                    # cv2.drawContours(roi_DX, [contours], -1, (0, 255, 0), 2) 
-                    # cv2.rectangle(roi_DX, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                     # Animate detection point
-                    if 500 in range(200 + y, 200 + y + h):
+                    if CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][1] in range(CAMERA_SETTINGS[source[6 :len(source) - 4]]["roi_SX"][0] + y, CAMERA_SETTINGS[source[6 : len(source) - 4]]["roi_SX"][0] + y + h):
                         passing_DX = True
 
-            if DETECTION_POINT: cv2.line(frame, (320, 500), (1000, 500), (0, 0, 255), 2)
+            # Draw detection point
+            if DETECTION_POINT:
+                cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][1]),
+                (CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][3]), (0, 0, 255), 2)
             
             if passing_SX:
                 if not os.path.isfile('tmp/{}.png'.format(str(vehicle_ID) + '_IN')):
                     vehicle_count_SX += 1
-                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_IN'), original[200 : 700, 250 : 690])
-                if DETECTION_POINT: cv2.line(frame, (320, 500), (660, 500), (255, 255, 255), 2)
+                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_IN'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["photo_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["photo_SX"][1],
+                                                                                       CAMERA_SETTINGS[source[6 : len(source) - 4]]["photo_SX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["photo_SX"][3]])
+                if DETECTION_POINT:
+                    cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][1]),
+                                    (CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][3]), (255, 255, 255), 2)
             
             if passing_DX:
                 if not os.path.isfile('tmp/{}.png'.format(str(vehicle_ID) + '_OUT')):
                     vehicle_count_DX += 1
-                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_OUT'), original[200 : 700, 650 : 1050])
-                if DETECTION_POINT: cv2.line(frame, (660, 500), (1000, 500), (255, 255, 255), 2)
+                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_OUT'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["photo_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["photo_DX"][1],
+                                                                                        CAMERA_SETTINGS[source[6 : len(source) - 4]]["photo_DX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["photo_DX"][3]])
+                if DETECTION_POINT:
+                    cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][1]),
+                                    (CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["detection_point"][3]), (255, 255, 255), 2)
                 
             if not passing_SX and not passing_DX:
                 vehicle_ID += 1
@@ -121,11 +128,11 @@ class Video:
             # Wait for ESC key to stop
             key = cv2.waitKey(30)
             if key == 27:
-                cap.release()
+                capture.release()
                 cv2.destroyAllWindows()
                 os.kill(show.pid, 9)
 
-            # Update data on the screen every second
+            # Update data on the screen (almost) every second
             end_update = time()
             update_interval += end_update - start_update
             if update_interval >= 1:
@@ -137,7 +144,7 @@ class Video:
             cv2.putText(frame, 'Vehicle DX: {}'.format(vehicle_count_DX), (10, 95), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
 
             # Show the video (and layer)
-            cv2.imshow(source[6 : len(source) - 4], frame)
+            cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["title"], frame)
             cv2.imshow('Left lane', mask_SX)
             cv2.imshow('Right lane', mask_DX)
 
@@ -210,8 +217,12 @@ class Video:
 if __name__ == '__main__':
 
     # Take video frome source (GUI)
-    source = 'video/SPFS.mp4'
-    
+    source = 'video/camera_1.mp4'
+
+    # Import camera settings
+    with open('CAMERA_SETTINGS.json', 'r') as f:
+        CAMERA_SETTINGS = json.load(f)
+
     vid = Video(source)
     
     # Initialize process
