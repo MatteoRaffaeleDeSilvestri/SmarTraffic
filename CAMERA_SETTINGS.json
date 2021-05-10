@@ -1,6 +1,17 @@
 {
     "camera_1" : {
-        "title" : "Via Fondi-Sperlonga",
+        "Title" : "Via Fondi-Sperlonga",
+        "BackgroundSubtractor" : [90, 120],
+        "ROI_SX" : [200, 700, 250, 640],
+        "ROI_DX" : [200, 700, 660, 1050],
+        "Surface" : 1000,
+        "DetectionPoint" : [330, 500, 990, 500],
+        "Area_SX" : [200, 700, 250, 690],
+        "Area_DX" : [200, 700, 650, 1050]
+    },
+
+    "camera_2" : {
+        "title" : "Via Appia Lato Itri",
         "history" : 90,
         "varThreshold" : 120,
         "roi_SX" : [200, 700, 250, 640],
@@ -11,7 +22,6 @@
         "photo_DX" : [200, 700, 650, 1050]
     },
 
-    "camera_2" : 0,
     "camera_3" : 0,
     "camera_4" : 0
 }
