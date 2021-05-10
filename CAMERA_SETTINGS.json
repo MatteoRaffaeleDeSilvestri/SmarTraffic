@@ -1,27 +1,45 @@
 {
     "camera_1" : {
         "Title" : "Via Fondi-Sperlonga",
-        "BackgroundSubtractor" : [90, 120],
-        "ROI_SX" : [200, 700, 250, 640],
-        "ROI_DX" : [200, 700, 660, 1050],
+        "BackgroundSubtractor" : [90, 150],
+        "ROI_SX" : [200, 700, 250, 550],
+        "ROI_DX" : [200, 700, 550, 850],
         "Surface" : 1000,
-        "DetectionPoint" : [330, 500, 990, 500],
-        "Area_SX" : [200, 700, 250, 690],
-        "Area_DX" : [200, 700, 650, 1050]
+        "DetectionPoint" : [270, 500, 850, 500],
+        "Area_SX" : [200, 700, 250, 580],
+        "Area_DX" : [200, 700, 530, 830]
     },
 
     "camera_2" : {
-        "title" : "Via Appia Lato Itri",
-        "history" : 90,
-        "varThreshold" : 120,
-        "roi_SX" : [200, 700, 250, 640],
-        "roi_DX" : [200, 700, 660, 1050],
-        "area" : 1000,
-        "detection_point" : [330, 500, 990, 500],
-        "photo_SX" : [200, 700, 250, 690],
-        "photo_DX" : [200, 700, 650, 1050]
+        "Title" : "Via Fondi-Sperlonga",
+        "BackgroundSubtractor" : [90, 150],
+        "ROI_SX" : [200, 700, 250, 550],
+        "ROI_DX" : [200, 700, 550, 850],
+        "Surface" : 1000,
+        "DetectionPoint" : [270, 500, 850, 500],
+        "Area_SX" : [200, 700, 250, 580],
+        "Area_DX" : [200, 700, 530, 830]
     },
 
-    "camera_3" : 0,
-    "camera_4" : 0
+    "camera_3" : {
+        "Title" : "Via Fondi-Sperlonga",
+        "BackgroundSubtractor" : [90, 150],
+        "ROI_SX" : [200, 700, 250, 550],
+        "ROI_DX" : [200, 700, 550, 850],
+        "Surface" : 1000,
+        "DetectionPoint" : [270, 500, 850, 500],
+        "Area_SX" : [200, 700, 250, 580],
+        "Area_DX" : [200, 700, 530, 830]
+    },
+    
+    "camera_4" : {
+        "Title" : "Via Fondi-Sperlonga",
+        "BackgroundSubtractor" : [90, 150],
+        "ROI_SX" : [200, 700, 250, 550],
+        "ROI_DX" : [200, 700, 550, 850],
+        "Surface" : 1000,
+        "DetectionPoint" : [270, 500, 850, 500],
+        "Area_SX" : [200, 700, 250, 580],
+        "Area_DX" : [200, 700, 530, 830]
+    }
 }

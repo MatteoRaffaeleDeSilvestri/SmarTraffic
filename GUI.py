@@ -1,39 +1,38 @@
 import cv2
 import tkinter as tk
-from PIL import ImageTk, Image
-
-class GUI:
+import main
+import os, webbrowser
     
-    def __init__(self):
+def Openfolder():
+    webbrowser.open('analysed')
 
-        # Capture from camera
-        self.cap = cv2.VideoCapture('video/camera_2.mp4')
-        
-        root = tk.Tk()
-        root.geometry('1500x900')
-        root.title('Smart Traffic')
-        root.resizable(False, False)
-        
-        label1 = tk.Label(root, text='Use an image as logo')
-        label1.grid(column=0, row=0, padx=10, pady=30)
+cameras = {
+    'Camera 1': 'camera_1.mp4',
+    'Camera 2': 'camera_2.mp4',
+    'Camera 3': 'camera_3.mp4',
+    'Camera 4': 'camera_4.mp4',
+}
 
-        player = tk.Frame(root, bg="white")
-        player.grid(column=1, row=0)
-        self.player_frame = tk.Label(player)
-        self.player_frame.grid(column=1, row=0)
+root = tk.Tk()
+root.title('Smart Traffic')
+root.resizable(False, False)
 
-        
-        root.mainloop()
-        video_stream()
+logo = tk.Canvas(root, width=461, height=120)
+logo.grid(columnspan=1, row=0, padx=40, pady=30)
+logo_img = tk.PhotoImage(file='logo.png')
+logo.create_image(0, 0, anchor='nw', image=logo_img)
 
-    def video_stream(self):
-        _, frame = self.cap.read()
-        cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-        img = Image.fromarray(cv2image)
-        imgtk = ImageTk.PhotoImage(image=img)
-        player_frame.imgtk = imgtk
-        player_frame.configure(image=imgtk)
-        player_frame.after(1, video_stream)
+sources = [video for video in cameras.keys()]
+for video in sources:
+    sources.remove
+    video = video[:len(video) - 4].replace('_', ' ')
 
-if __name__ == '__main__':
-    x = GUI()
+variable = tk.StringVar(root)
+variable.set(sources[0])
+dropdown_menu = tk.OptionMenu(root, variable, *sources)
+dropdown_menu.grid(column=0, row=1, padx=10)
+
+btn = tk.Button(root, text='Play', command=Openfolder) # command=lambda: main.run('video/camera_1.mp4'))
+btn.grid(column=0, row=2, pady=40)
+
+root.mainloop()

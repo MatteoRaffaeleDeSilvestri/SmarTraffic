@@ -1,29 +1,56 @@
 import cv2
-import numpy as np
-from PIL import Image
-from time import time, sleep
-import os
+import numpy
 import multiprocessing
 import json
+import time
+import copy
+import os
+import sys
 
 # Global variable
 DETECTION_POINT = True
-CAMERA_SETTINGS = None
+
+# Import camera settings
+with open('CAMERA_SETTINGS.json', 'r') as f:
+    CAMERA_SETTINGS = json.load(f)
+
+def run(source):
+
+    # Prepare the object recognition system (YOLOv4)
+    net = cv2.dnn.readNet('yolov4.weights', 'yolov4.cfg')
+    
+    classes = list()
+    with open('coco.names', 'r') as f:
+        classes = f.read().splitlines()
+
+    video = Video(net, classes, source)
+
+    # Initialize process
+    play = multiprocessing.Process(target=video.play)
+    detect = multiprocessing.Process(target=video.detector)
+
+    # Starting multiprocessing procedure
+    detect.start()
+    play.start()
+
+    while True:
+        ''' Ottimizza questo ciclo '''
+        if type(play.exitcode) == int and not len(os.listdir('tmp')):
+                os.kill(detect.pid, 9)
+                break
+        time.sleep(5)
 
 class Video:
 
-    def __init__(self, source):
+    def __init__(self, net, classes, source):
 
-        # Prepare the object recognition system (YOLOv4)
-        self.net = cv2.dnn.readNet('yolov4.weights', 'yolov4.cfg')
-    
-        self.classes = list()
-        with open('coco.names', 'r') as f:
-            self.classes = f.read().splitlines()
-
+        self.net = net
+        self.classes = classes
         self.camera = source
-         
+
     def play(self):
+
+        playing = True
 
         # Take video frome source 
         source = self.camera
@@ -39,20 +66,20 @@ class Video:
         FPS = '-'
 
         # Object detection from camera
-        object_detector = cv2.createBackgroundSubtractorMOG2(CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][1])
+        object_detector = cv2.createBackgroundSubtractorMOG2(history=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][0], varThreshold=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][1])
 
-        while True:
+        while playing:
 
             _, frame = capture.read()
 
             if frame is None:
                 capture.release()
                 cv2.destroyAllWindows()
-                os.kill(show.pid, 9)
+                playing = False
             
-            start_update = time()
+            start_update = time.time()
 
-            original = frame
+            original = copy.deepcopy(frame)
 
             # Define region of interest (ROI)
             roi_SX = frame[CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][1],
@@ -125,14 +152,13 @@ class Video:
             passing_DX = False
             
             # Wait for ESC key to stop
-            key = cv2.waitKey(30)
-            if key == 27:
+            if cv2.waitKey(30) == 27:
                 capture.release()
                 cv2.destroyAllWindows()
-                os.kill(show.pid, 9)
+                playing = False
 
             # Update data on the screen (almost) every second
-            end_update = time()
+            end_update = time.time()
             update_interval += end_update - start_update
             if update_interval >= 1:
                 FPS = int(1 / round(end_update - start_update, 3))
@@ -144,12 +170,14 @@ class Video:
 
             # Show the video (and layer)
             cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], frame)
-            cv2.imshow('Left lane', mask_SX)
-            cv2.imshow('Right lane', mask_DX)
+            # cv2.imshow('Left lane', roi_SX)
+            # cv2.imshow('Right lane', roi_DX)
 
     def detector(self):
 
-        while True:
+        detecting = True
+
+        while detecting:
             
             if len(os.listdir('tmp')):
 
@@ -174,7 +202,7 @@ class Video:
                         for detection in output:
                         
                             scores = detection[5:]
-                            class_id = np.argmax(scores)
+                            class_id = numpy.argmax(scores)
                             confidence = scores[class_id]
                         
                             if confidence > 0.5:
@@ -211,30 +239,4 @@ class Video:
                     
             else:
                 ''' Set a dynamic value for sleep '''
-                sleep(5)
-
-if __name__ == '__main__':
-
-    # Take video frome source (GUI)
-    source = 'video/camera_1.mp4'
-
-    # Import camera settings
-    with open('CAMERA_SETTINGS.json', 'r') as f:
-        CAMERA_SETTINGS = json.load(f)
-
-    vid = Video(source)
-    
-    # Initialize process
-    show = multiprocessing.Process(target=vid.play)
-    detect = multiprocessing.Process(target=vid.detector)
-
-    # Starting multiprocessing procedure
-    detect.start()
-    show.start()
-
-    while True:
-        ''' Ottimizza questo ciclo ''' 
-        if not show.is_alive() and not len(os.listdir('tmp')):
-            os.kill(detect.pid, 9)
-            break
-        sleep(5)
+                time.sleep(5)
