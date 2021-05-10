@@ -5,16 +5,8 @@ import json
 import time
 import copy
 import os
-import sys
-
-# Global variable
-DETECTION_POINT = True
-
-# Import camera settings
-with open('CAMERA_SETTINGS.json', 'r') as f:
-    CAMERA_SETTINGS = json.load(f)
-
-def run(source):
+        
+def run(source, dp):
 
     # Prepare the object recognition system (YOLOv4)
     net = cv2.dnn.readNet('yolov4.weights', 'yolov4.cfg')
@@ -23,7 +15,7 @@ def run(source):
     with open('coco.names', 'r') as f:
         classes = f.read().splitlines()
 
-    video = Video(net, classes, source)
+    video = Video(net, classes, source, dp)
 
     # Initialize process
     play = multiprocessing.Process(target=video.play)
@@ -42,13 +34,18 @@ def run(source):
 
 class Video:
 
-    def __init__(self, net, classes, source):
+    def __init__(self, net, classes, source, detection_point):
 
         self.net = net
         self.classes = classes
         self.camera = source
+        self.detection_point = detection_point
 
     def play(self):
+
+        # Import camera settings
+        with open('CAMERA_SETTINGS.json', 'r') as f:
+            CAMERA_SETTINGS = json.load(f)
 
         playing = True
 
@@ -123,7 +120,7 @@ class Video:
                         passing_DX = True
 
             # Draw detection point
-            if DETECTION_POINT:
+            if self.detection_point:
                 cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                 (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (0, 0, 255), 2)
             
@@ -132,7 +129,7 @@ class Video:
                     vehicle_count_SX += 1
                     cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_IN'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][1],
                                                                                        CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][3]])
-                if DETECTION_POINT:
+                if self.detection_point:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                     (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (255, 255, 255), 2)
             
@@ -141,7 +138,7 @@ class Video:
                     vehicle_count_DX += 1
                     cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_OUT'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][1],
                                                                                         CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][3]])
-                if DETECTION_POINT:
+                if self.detection_point:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                     (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (255, 255, 255), 2)
                 
@@ -170,8 +167,8 @@ class Video:
 
             # Show the video (and layer)
             cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], frame)
-            # cv2.imshow('Left lane', roi_SX)
-            # cv2.imshow('Right lane', roi_DX)
+            cv2.imshow('Left lane', roi_SX)
+            cv2.imshow('Right lane', roi_DX)
 
     def detector(self):
 

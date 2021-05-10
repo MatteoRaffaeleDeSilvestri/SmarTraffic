@@ -12,13 +12,13 @@
 
     "camera_2" : {
         "Title" : "Via Fondi-Sperlonga",
-        "BackgroundSubtractor" : [90, 150],
-        "ROI_SX" : [200, 700, 250, 550],
-        "ROI_DX" : [200, 700, 550, 850],
+        "BackgroundSubtractor" : [50, 250],
+        "ROI_SX" : [300, 700, 300, 550],
+        "ROI_DX" : [300, 700, 500, 800],
         "Surface" : 1000,
-        "DetectionPoint" : [270, 500, 850, 500],
-        "Area_SX" : [200, 700, 250, 580],
-        "Area_DX" : [200, 700, 530, 830]
+        "DetectionPoint" : [350, 450, 750, 450],
+        "Area_SX" : [300, 700, 250, 580],
+        "Area_DX" : [300, 700, 530, 830]
     },
 
     "camera_3" : {

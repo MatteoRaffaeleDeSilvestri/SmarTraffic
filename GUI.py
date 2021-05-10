@@ -3,36 +3,46 @@ import tkinter as tk
 import main
 import os, webbrowser
     
-def Openfolder():
-    webbrowser.open('analysed')
+# def Openfolder(x):
+#     print(x)
+#     webbrowser.open('analysed')
 
-cameras = {
-    'Camera 1': 'camera_1.mp4',
-    'Camera 2': 'camera_2.mp4',
-    'Camera 3': 'camera_3.mp4',
-    'Camera 4': 'camera_4.mp4',
-}
+class GUI:
 
-root = tk.Tk()
-root.title('Smart Traffic')
-root.resizable(False, False)
+    def __init__(self):
 
-logo = tk.Canvas(root, width=461, height=120)
-logo.grid(columnspan=1, row=0, padx=40, pady=30)
-logo_img = tk.PhotoImage(file='logo.png')
-logo.create_image(0, 0, anchor='nw', image=logo_img)
+        # Set window propriety
+        root = tk.Tk()
+        root.title('Smart Traffic')
+        root.resizable(False, False)
 
-sources = [video for video in cameras.keys()]
-for video in sources:
-    sources.remove
-    video = video[:len(video) - 4].replace('_', ' ')
+        # Show logo
+        logo = tk.Canvas(root, width=452, height=114)
+        logo.grid(columnspan=1, row=0, padx=40, pady=30)
+        logo_img = tk.PhotoImage(file='logo.png')
+        logo.create_image(0, 0, anchor='nw', image=logo_img)
 
-variable = tk.StringVar(root)
-variable.set(sources[0])
-dropdown_menu = tk.OptionMenu(root, variable, *sources)
-dropdown_menu.grid(column=0, row=1, padx=10)
+        cameras = {
+            'Camera 1 - Via Fondi-Sperlonga': 'camera_1.mp4',
+            'Camera 2 - Via Appia Lato Itri': 'camera_2.mp4',
+            'Camera 3': 'camera_3.mp4',
+            'Camera 4': 'camera_4.mp4',
+        }
 
-btn = tk.Button(root, text='Play', command=Openfolder) # command=lambda: main.run('video/camera_1.mp4'))
-btn.grid(column=0, row=2, pady=40)
+        sources = [video for video in cameras.keys()]
 
-root.mainloop()
+        variable = tk.StringVar(root)
+        variable.set(sources[0])
+        dropdown_menu = tk.OptionMenu(root, variable, *sources).grid(column=0, row=1, padx=10)
+
+        dp = tk.IntVar()
+        box = tk.Checkbutton(root, text='Enable detection point', variable=dp).grid(column=0, row=2)
+
+        play_btn = tk.Button(root, text='Play', command=lambda: main.run('video/{}'.format(cameras[variable.get()]), dp.get())).grid(column=0, row=3, pady=40)
+        show_btn = tk.Button(root, text='Show detections', state='disabled').grid(column=0, row=4, pady=40)
+
+        root.mainloop()
+
+if __name__ == '__main__':
+    
+    GUI()
