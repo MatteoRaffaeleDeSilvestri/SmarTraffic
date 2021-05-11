@@ -25,12 +25,13 @@ def run(source, dp, sts):
     detect.start()
     play.start()
 
+    timeout = 5
     while True:
-        ''' Ottimizza questo ciclo '''
-        if type(play.exitcode) == int and not len(os.listdir('tmp')):
-                os.kill(detect.pid, 9)
-                break
-        time.sleep(5)
+        if play.exitcode == 0 and not len(os.listdir('tmp')):
+            os.kill(detect.pid, 9)
+            timeout = 0
+            break
+        time.sleep(timeout)
 
 class Video:
 
@@ -160,6 +161,7 @@ class Video:
                 FPS = int(1 / round(end_update - start_update, 3))
                 update_interval = 0
             
+            # display live statistics on the screen 
             if self.stats:
                 cv2.rectangle(frame, (5, 5), (250, 110), (145, 145, 145), -1)
                 cv2.putText(frame, 'FPS: {}'.format(FPS), (8, 25), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
@@ -179,6 +181,8 @@ class Video:
         while detecting:
             
             if len(os.listdir('tmp')):
+
+                base = cv2.imread('ticket.png')
 
                 for photo in os.listdir('tmp'):
                     
@@ -200,7 +204,7 @@ class Video:
  
                         for detection in output:
                         
-                            scores = detection[5:]
+                            scores = detection[5 : ]
                             class_id = numpy.argmax(scores)
                             confidence = scores[class_id]
                         
@@ -220,18 +224,25 @@ class Video:
 
                     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
                     
-                    if len(indexes) > 0:
-                        for i in indexes.flatten():
-                            x, y, w, h = boxes[i]
-                            label = str(self.classes[class_ids[i]])
-                            confidence = str(round(confidences[i] * 100, 1)) + '%'
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
-                            cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
-                            cv2.putText(img, label + ' ' + confidence, (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 1.5, (10, 10, 10), 1)
-                            cv2.putText(img, '', (x, y + 20), cv2.FONT_HERSHEY_PLAIN, 1.5, (255, 255, 255), 1)
+                    if len(indexes) == 1:
+
+                        ticket = base.copy()
+                        
+                        i = indexes.flatten()[0]
+                        x, y, w, h = boxes[i]
+                        label = str(self.classes[class_ids[i]])
+                        confidence = str(round(confidences[i] * 100, 1)) + '%'
+                        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        # cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
+                        ticket[18 : 427, 120 : 370] = img[:]
+                        cv2.putText(ticket, label + ' ' + confidence, (500, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 2)
+                        cv2.putText(ticket, '', (x, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                    else:
+                        print('Multiple or no object detection', len(indexes))
+                        pass
 
                     # Save new (generated) photo
-                    cv2.imwrite('detections/{}.png'.format(len(os.listdir('detections')) + 1), img)
+                    cv2.imwrite('detections/{}.png'.format(len(os.listdir('detections')) + 1), ticket)
                     
                     # Delete analized photos
                     os.remove('tmp/{}'.format(photo))
@@ -242,5 +253,17 @@ class Video:
 
 #     def traffic_conditions(self):
 #         # Determina le condizioni del traffico
+    
+def ticket_maker(self, obj, conf):
+    
+    base = cv2.imread('ticket.png')
+    auto = cv2.imread('detections/1.png')
+    ticket = base.copy()
+    ticket[27 : 427, 120 : 370] = auto[0 : 400 , 0 : 250]
 
-# run('video/camera_3.mp4', 1, 1)
+    return ticket
+
+#     def speed_detector(self):
+#         # Determina le condizioni del traffico
+
+run('video/camera_1.mp4', 1, 1)
