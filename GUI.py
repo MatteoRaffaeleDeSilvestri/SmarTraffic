@@ -25,8 +25,8 @@ class GUI:
         cameras = {
             'Camera 1 - Via Fondi-Sperlonga': 'camera_1.mp4',
             'Camera 2 - Via Appia Lato Itri': 'camera_2.mp4',
-            'Camera 3': 'camera_3.mp4',
-            'Camera 4': 'camera_4.mp4',
+            'Camera 3 - SR637': 'camera_3.mp4',
+            'Camera 4 - SS7': 'camera_4.mp4',
         }
 
         sources = [video for video in cameras.keys()]

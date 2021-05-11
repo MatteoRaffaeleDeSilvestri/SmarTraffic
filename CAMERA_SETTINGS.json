@@ -12,33 +12,33 @@
 
     "camera_2" : {
         "Title" : "Via Fondi-Sperlonga",
-        "BackgroundSubtractor" : [50, 250],
-        "ROI_SX" : [300, 700, 300, 550],
-        "ROI_DX" : [300, 700, 500, 800],
+        "BackgroundSubtractor" : [50, 100],
+        "ROI_SX" : [200, 700, 280, 580],
+        "ROI_DX" : [200, 700, 480, 780],
         "Surface" : 1000,
         "DetectionPoint" : [350, 450, 750, 450],
-        "Area_SX" : [300, 700, 250, 580],
-        "Area_DX" : [300, 700, 530, 830]
+        "Area_SX" : [200, 600, 250, 580],
+        "Area_DX" : [350, 750, 530, 830]
     },
 
     "camera_3" : {
-        "Title" : "Via Fondi-Sperlonga",
-        "BackgroundSubtractor" : [90, 150],
+        "Title" : "Strada Regionale 637 di Frosinone e di Gaeta",
+        "BackgroundSubtractor" : [100, 50],
         "ROI_SX" : [200, 700, 250, 550],
         "ROI_DX" : [200, 700, 550, 850],
         "Surface" : 1000,
-        "DetectionPoint" : [270, 500, 850, 500],
-        "Area_SX" : [200, 700, 250, 580],
-        "Area_DX" : [200, 700, 530, 830]
+        "DetectionPoint" : [330, 500, 800, 500],
+        "Area_SX" : [330, 700, 300, 580],
+        "Area_DX" : [330, 700, 530, 830]
     },
     
     "camera_4" : {
-        "Title" : "Via Fondi-Sperlonga",
+        "Title" : "Via Appia Lato Roma",
         "BackgroundSubtractor" : [90, 150],
         "ROI_SX" : [200, 700, 250, 550],
         "ROI_DX" : [200, 700, 550, 850],
         "Surface" : 1000,
-        "DetectionPoint" : [270, 500, 850, 500],
+        "DetectionPoint" : [340, 450, 720, 450],
         "Area_SX" : [200, 700, 250, 580],
         "Area_DX" : [200, 700, 530, 830]
     }

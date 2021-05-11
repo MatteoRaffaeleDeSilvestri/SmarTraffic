@@ -47,8 +47,6 @@ class Video:
         with open('CAMERA_SETTINGS.json', 'r') as f:
             CAMERA_SETTINGS = json.load(f)
 
-        playing = True
-
         # Take video frome source 
         source = self.camera
         capture = cv2.VideoCapture(source)
@@ -65,14 +63,14 @@ class Video:
         # Object detection from camera
         object_detector = cv2.createBackgroundSubtractorMOG2(history=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][0], varThreshold=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][1])
 
-        while playing:
+        while True:
 
-            _, frame = capture.read()
+            ret, frame = capture.read()
 
-            if frame is None:
+            if not ret:
                 capture.release()
                 cv2.destroyAllWindows()
-                playing = False
+                break
             
             start_update = time.time()
 
@@ -152,7 +150,7 @@ class Video:
             if cv2.waitKey(30) == 27:
                 capture.release()
                 cv2.destroyAllWindows()
-                playing = False
+                break
 
             # Update data on the screen (almost) every second
             end_update = time.time()
@@ -167,8 +165,8 @@ class Video:
 
             # Show the video (and layer)
             cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], frame)
-            cv2.imshow('Left lane', roi_SX)
-            cv2.imshow('Right lane', roi_DX)
+            # cv2.imshow('Left lane', mask_SX)
+            # cv2.imshow('Right lane', mask_DX)
 
     def detector(self):
 
@@ -237,3 +235,5 @@ class Video:
             else:
                 ''' Set a dynamic value for sleep '''
                 time.sleep(5)
+
+run('video/camera_4.mp4', 1)
