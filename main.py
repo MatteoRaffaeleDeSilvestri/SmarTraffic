@@ -6,7 +6,7 @@ import time
 import copy
 import os
         
-def run(source, dp):
+def run(source, dp, sts):
 
     # Prepare the object recognition system (YOLOv4)
     net = cv2.dnn.readNet('yolov4.weights', 'yolov4.cfg')
@@ -15,7 +15,7 @@ def run(source, dp):
     with open('coco.names', 'r') as f:
         classes = f.read().splitlines()
 
-    video = Video(net, classes, source, dp)
+    video = Video(net, classes, source, dp, sts)
 
     # Initialize process
     play = multiprocessing.Process(target=video.play)
@@ -34,12 +34,13 @@ def run(source, dp):
 
 class Video:
 
-    def __init__(self, net, classes, source, detection_point):
+    def __init__(self, net, classes, source, detection_point, stats):
 
         self.net = net
         self.classes = classes
         self.camera = source
         self.detection_point = detection_point
+        self.stats = stats
 
     def play(self):
 
@@ -158,10 +159,13 @@ class Video:
             if update_interval >= 1:
                 FPS = int(1 / round(end_update - start_update, 3))
                 update_interval = 0
-            cv2.rectangle(frame, (5, 5), (250, 110), (50, 50, 50), -1)
-            cv2.putText(frame, 'FPS: {}'.format(FPS), (10, 35), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
-            cv2.putText(frame, 'Vehicle SX: {}'.format(vehicle_count_SX), (10, 65), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
-            cv2.putText(frame, 'Vehicle DX: {}'.format(vehicle_count_DX), (10, 95), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
+            
+            if self.stats:
+                cv2.rectangle(frame, (5, 5), (250, 110), (145, 145, 145), -1)
+                cv2.putText(frame, 'FPS: {}'.format(FPS), (8, 25), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
+                cv2.putText(frame, 'In ingresso: {}'.format(vehicle_count_SX), (8, 50), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
+                cv2.putText(frame, 'In uscita: {}'.format(vehicle_count_DX), (8, 75), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
+                cv2.putText(frame, 'Previsioni traffico: {}'.format('scorrevole'), (8, 100), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
 
             # Show the video (and layer)
             cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], frame)
@@ -223,11 +227,11 @@ class Video:
                             confidence = str(round(confidences[i] * 100, 1)) + '%'
                             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
                             cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
-                            cv2.putText(img, label + ' ' + confidence, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
-                            cv2.putText(img, '', (x, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 1)
+                            cv2.putText(img, label + ' ' + confidence, (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 1.5, (10, 10, 10), 1)
+                            cv2.putText(img, '', (x, y + 20), cv2.FONT_HERSHEY_PLAIN, 1.5, (255, 255, 255), 1)
 
                     # Save new (generated) photo
-                    cv2.imwrite('analysed/{}.png'.format(len(os.listdir('analysed')) + 1), img)
+                    cv2.imwrite('detections/{}.png'.format(len(os.listdir('detections')) + 1), img)
                     
                     # Delete analized photos
                     os.remove('tmp/{}'.format(photo))
@@ -236,4 +240,7 @@ class Video:
                 ''' Set a dynamic value for sleep '''
                 time.sleep(5)
 
-run('video/camera_4.mp4', 1)
+#     def traffic_conditions(self):
+#         # Determina le condizioni del traffico
+
+# run('video/camera_3.mp4', 1, 1)
