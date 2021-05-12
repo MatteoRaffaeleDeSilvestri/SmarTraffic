@@ -5,6 +5,10 @@ import json
 import time
 import copy
 import os
+
+# Import camera settings
+with open('CAMERA_SETTINGS.json', 'r') as f:
+    CAMERA_SETTINGS = json.load(f)
         
 def run(source, dp, sts):
 
@@ -44,10 +48,6 @@ class Video:
         self.stats = stats
 
     def play(self):
-
-        # Import camera settings
-        with open('CAMERA_SETTINGS.json', 'r') as f:
-            CAMERA_SETTINGS = json.load(f)
 
         # Take video frome source 
         source = self.camera
@@ -122,21 +122,21 @@ class Video:
             # Draw detection point
             if self.detection_point:
                 cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
-                (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (0, 0, 255), 2)
+                                (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (0, 0, 255), 2)
             
             if passing_SX:
-                if not os.path.isfile('tmp/{}.png'.format(str(vehicle_ID) + '_IN')):
+                if not os.path.isfile('tmp/{}.png'.format(str(vehicle_ID) + '_Coming')):
                     vehicle_count_SX += 1
-                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_IN'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][1],
+                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_Coming'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][1],
                                                                                        CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][3]])
                 if self.detection_point:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                     (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (255, 255, 255), 2)
             
             if passing_DX:
-                if not os.path.isfile('tmp/{}.png'.format(str(vehicle_ID) + '_OUT')):
+                if not os.path.isfile('tmp/{}.png'.format(str(vehicle_ID) + '_Leaving')):
                     vehicle_count_DX += 1
-                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_OUT'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][1],
+                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_Leaving'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][1],
                                                                                         CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][3]])
                 if self.detection_point:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
@@ -223,28 +223,44 @@ class Video:
                                 class_ids.append(class_id)
 
                     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+
+                    ticket = base.copy()
                     
                     if len(indexes) == 1:
 
-                        ticket = base.copy()
+                        x, y, w, h = boxes[indexes.flatten()[0]]
+                        obj = self.classes[class_ids[indexes.flatten()[0]]]
+                        confidence = round(confidences[indexes.flatten()[0]] * 100, 1)
+                        direction = photo[photo.index('_') + 1 : len(photo) - 4]
                         
-                        i = indexes.flatten()[0]
-                        x, y, w, h = boxes[i]
-                        label = str(self.classes[class_ids[i]])
-                        confidence = str(round(confidences[i] * 100, 1)) + '%'
                         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                        # cv2.rectangle(img, (x - 1, y), (x + w + 1, y - 20), (0, 255, 0), -1)
-                        ticket[18 : 427, 120 : 370] = img[:]
-                        cv2.putText(ticket, label + ' ' + confidence, (500, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 2)
-                        cv2.putText(ticket, '', (x, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-                    else:
-                        print('Multiple or no object detection', len(indexes))
-                        pass
+                        # ticket[17 : 381, 19 : 272] = cv2.resize(img, (253, 364))
+                        # cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (355, 38), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
+                        # cv2.putText(ticket, '{} - {}%'.format(obj, confidence), (515, 81), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
+                        # cv2.putText(ticket, '{}'.format(photo[photo.index('_') + 1 : len(photo) - 4]), (393, 123), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
 
-                    # Save new (generated) photo
+                    # Manage detection anomalies
+                    else:
+                        
+                        # No object detected
+                        if len(indexes) == 0:
+
+                            obj, confidence = '-'
+                            direction = photo[photo.index('_') + 1 : len(photo) - 4]
+
+                        # Multiple object detected
+                        else:
+                            print('Multiple object detection')
+
+                    ticket[17 : 381, 19 : 272] = cv2.resize(img, (253, 364))
+                    cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (355, 38), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
+                    cv2.putText(ticket, '{} - {}%'.format(obj, confidence), (515, 81), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
+                    cv2.putText(ticket, '{}'.format(direction), (393, 123), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
+
+                    # Save new (generated) ticket
                     cv2.imwrite('detections/{}.png'.format(len(os.listdir('detections')) + 1), ticket)
                     
-                    # Delete analized photos
+                    # Delete temporary frame
                     os.remove('tmp/{}'.format(photo))
                     
             else:
@@ -253,15 +269,6 @@ class Video:
 
 #     def traffic_conditions(self):
 #         # Determina le condizioni del traffico
-    
-def ticket_maker(self, obj, conf):
-    
-    base = cv2.imread('ticket.png')
-    auto = cv2.imread('detections/1.png')
-    ticket = base.copy()
-    ticket[27 : 427, 120 : 370] = auto[0 : 400 , 0 : 250]
-
-    return ticket
 
 #     def speed_detector(self):
 #         # Determina le condizioni del traffico
