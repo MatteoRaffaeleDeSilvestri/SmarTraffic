@@ -1,21 +1,11 @@
 /.vscode
-/2004.10934.pdf
 /coco.names
 /media
-/project.avi
-/render
 /vGen
 /video
-/yolov4-tiny.cfg
-/yolov4-tiny.weights
-/yolov4.cfg
-/yolov4.weights
-output.mp4
 /detections
-/analysed
-vehicle_counting /main.py
 __pycache__/utilities.cpython-38.pyc
-tmp/1328_IN.png
-tmp/1328_OUT.png
 __pycache__/main.cpython-38.pyc
 istockphoto-1167361237-612x612.jpg
+logo.png
+ticket.png
