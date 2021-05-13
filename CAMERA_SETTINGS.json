@@ -6,8 +6,9 @@
         "ROI_DX" : [200, 700, 550, 850],
         "Surface" : 1000,
         "DetectionPoint" : [270, 500, 850, 500],
-        "Area_SX" : [200, 700, 250, 580],
-        "Area_DX" : [200, 700, 530, 830]
+        "Area_SX" : [300, 800, 250, 580],
+        "Area_DX" : [300, 800, 530, 830],
+        "Date-time" : "08/05/2021 - 17:45:39"
     },
 
     "camera_2" : {
@@ -18,18 +19,20 @@
         "Surface" : 1000,
         "DetectionPoint" : [350, 450, 750, 450],
         "Area_SX" : [200, 600, 250, 580],
-        "Area_DX" : [350, 750, 530, 830]
+        "Area_DX" : [350, 750, 530, 830],
+        "Date-time" : "10/05/2021 - 17:45:39"
     },
 
     "camera_3" : {
-        "Title" : "Strada Regionale 637 di Frosinone e di Gaeta",
+        "Title" : "SR 637 (Frosinone - Gaeta)",
         "BackgroundSubtractor" : [100, 50],
         "ROI_SX" : [200, 700, 250, 550],
         "ROI_DX" : [200, 700, 550, 850],
         "Surface" : 1000,
         "DetectionPoint" : [330, 500, 800, 500],
         "Area_SX" : [330, 700, 300, 580],
-        "Area_DX" : [330, 700, 530, 830]
+        "Area_DX" : [330, 700, 530, 830],
+        "Date-time" : "11/05/2021 - 08:23:27"
     },
     
     "camera_4" : {
@@ -40,6 +43,7 @@
         "Surface" : 1000,
         "DetectionPoint" : [340, 400, 720, 400],
         "Area_SX" : [200, 700, 250, 580],
-        "Area_DX" : [200, 700, 530, 830]
+        "Area_DX" : [200, 700, 530, 830],
+        "Date-time" : "13/05/2021 - 17:45:39"
     }
 }

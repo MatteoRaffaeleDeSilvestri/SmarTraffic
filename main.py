@@ -5,18 +5,19 @@ import json
 import time
 import copy
 import os
+import calendar
 
 # Import camera settings
 with open('CAMERA_SETTINGS.json', 'r') as f:
     CAMERA_SETTINGS = json.load(f)
-        
-def run(source, dp, sts):
+
+def start(source, dp, sts):
 
     # Prepare the object recognition system (YOLOv4)
-    net = cv2.dnn.readNet('yolov4.weights', 'yolov4.cfg')
+    net = cv2.dnn.readNet('yolo/yolov4.weights', 'yolo/yolov4.cfg')
     
     classes = list()
-    with open('coco.names', 'r') as f:
+    with open('yolo/coco.names', 'r') as f:
         classes = f.read().splitlines()
 
     video = Video(net, classes, source, dp, sts)
@@ -29,23 +30,27 @@ def run(source, dp, sts):
     detect.start()
     play.start()
 
-    timeout = 5
     while True:
         if play.exitcode == 0 and not len(os.listdir('tmp')):
             os.kill(detect.pid, 9)
-            timeout = 0
             break
-        time.sleep(timeout)
+        time.sleep(3)
 
 class Video:
 
-    def __init__(self, net, classes, source, detection_point, stats):
+    def __init__(self, ntt, clss, source, dp, sts):
 
-        self.net = net
-        self.classes = classes
+        self.net = ntt
+        self.classes = clss
         self.camera = source
-        self.detection_point = detection_point
-        self.stats = stats
+        self.detection_point = dp
+        self.stats = sts
+
+        # Type of vehicle that can be seen on the road
+        self.vehicles = {'Bicycle', 'Car', 'Motorbike', 'Bus', 'Truck', 'Boat'}
+
+        # Common thing to be aware of during drive (other person and animals in general)
+        self.other_object = {'Person', 'Cat', 'Dog', 'Horse', 'Sheep', 'Cow', 'Bear'}
 
     def play(self):
 
@@ -56,9 +61,23 @@ class Video:
         # Cam variables
         passing_SX = False
         passing_DX = False
-        vehicle_ID = 0
+        vehicle_SX_ID = 0
+        vehicle_DX_ID = 0
         vehicle_count_SX = 0
         vehicle_count_DX = 0
+        
+        # Set timer 
+        date = CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"][ : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"].index('-') - 1].split('/')
+        day = date[0]
+        month = date[1]
+        year = date[2]
+        date = '{}/{}/{}'.format(day, month, year)
+        clock = CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"][CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"].index('-') + 2 : ].split(':')
+        hh = int(clock[0])
+        mm = int(clock[1])
+        ss = int(clock[2])
+        clock = '{}:{}:{}'.format(hh, mm, ss)
+        
         update_interval = 0
         FPS = '-'
 
@@ -114,7 +133,7 @@ class Video:
                 if cv2.contourArea(contours) >= CAMERA_SETTINGS[source[6 : len(source) - 4]]["Surface"]:
                     
                     x, y, w, h = cv2.boundingRect(contours)
-
+                    
                     # Animate detection point
                     if CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1] in range(CAMERA_SETTINGS[source[6 :len(source) - 4]]["ROI_SX"][0] + y, CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] + y + h):
                         passing_DX = True
@@ -124,26 +143,29 @@ class Video:
                 cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                 (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (0, 0, 255), 2)
             
+            # Take a picture of the left lane (ROI)
             if passing_SX:
-                if not os.path.isfile('tmp/{}.png'.format(str(vehicle_ID) + '_Coming')):
+                if not os.path.isfile('tmp/{}.png'.format(str(vehicle_SX_ID) + '_C')):
                     vehicle_count_SX += 1
-                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_Coming'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][1],
-                                                                                       CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][3]])
+                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_SX_ID) + '_C' + '{}{}{}{}{}{}'.format(day, month, year, hh, mm, ss)), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][1],
+                                                                                                                                                        CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][3]])
                 if self.detection_point:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                     (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (255, 255, 255), 2)
             
+            # Take a picture of the right lane (ROI)
             if passing_DX:
-                if not os.path.isfile('tmp/{}.png'.format(str(vehicle_ID) + '_Leaving')):
+                if not os.path.isfile('tmp/{}.png'.format(str(vehicle_DX_ID) + '_L' + '{}{}{}{}{}{}'.format(day, month, year, hh, mm, ss))):
                     vehicle_count_DX += 1
-                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_ID) + '_Leaving'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][1],
-                                                                                        CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][3]])
+                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_DX_ID) + '_L' + '{}{}{}{}{}{}'.format(day, month, year, hh, mm, ss)), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][1],
+                                                                                            CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][3]])
                 if self.detection_point:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                     (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (255, 255, 255), 2)
-                
-            if not passing_SX and not passing_DX:
-                vehicle_ID += 1
+            
+            # Update vehicle ID
+            if not passing_SX: vehicle_SX_ID += 1
+            if not passing_DX: vehicle_DX_ID += 1
             
             passing_SX = False
             passing_DX = False
@@ -159,15 +181,16 @@ class Video:
             update_interval += end_update - start_update
             if update_interval >= 1:
                 FPS = int(1 / round(end_update - start_update, 3))
+                year, month, day, hh, mm, ss = Video.timer(self, int(year), int(month), int(day), int(hh), int(mm), int(ss))
                 update_interval = 0
             
-            # display live statistics on the screen 
+            # Display live statistics on the screen 
             if self.stats:
                 cv2.rectangle(frame, (5, 5), (250, 110), (145, 145, 145), -1)
                 cv2.putText(frame, 'FPS: {}'.format(FPS), (8, 25), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
-                cv2.putText(frame, 'In ingresso: {}'.format(vehicle_count_SX), (8, 50), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
-                cv2.putText(frame, 'In uscita: {}'.format(vehicle_count_DX), (8, 75), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
-                cv2.putText(frame, 'Previsioni traffico: {}'.format('scorrevole'), (8, 100), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
+                cv2.putText(frame, 'Coming: {}'.format(vehicle_count_SX), (8, 50), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
+                cv2.putText(frame, 'Leaving: {}'.format(vehicle_count_DX), (8, 75), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 1)
+                cv2.putText(frame, '{}/{}/{} - {}:{}:{}'.format(day, month, year, hh, mm, ss), (780, 795), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 255, 255), 1)
 
             # Show the video (and layer)
             cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], frame)
@@ -176,14 +199,15 @@ class Video:
 
     def detector(self):
 
-        detecting = True
+        while True:
 
-        while detecting:
-            
+            # Check if there are photo to analyse
             if len(os.listdir('tmp')):
 
+                # Prepare the base for the ticket to generate
                 base = cv2.imread('ticket.png')
 
+                # Make detection for each photo
                 for photo in os.listdir('tmp'):
                     
                     img = cv2.imread('tmp/{}'.format(photo))
@@ -226,51 +250,107 @@ class Video:
 
                     ticket = base.copy()
                     
+                    # One object detected in the photo
                     if len(indexes) == 1:
 
                         x, y, w, h = boxes[indexes.flatten()[0]]
-                        obj = self.classes[class_ids[indexes.flatten()[0]]]
-                        confidence = round(confidences[indexes.flatten()[0]] * 100, 1)
-                        direction = photo[photo.index('_') + 1 : len(photo) - 4]
-                        
+                       
+                        obj = str(self.classes[class_ids[indexes.flatten()[0]]]) + ' - '
+                        confidence = str(round(confidences[indexes.flatten()[0]] * 100, 1)) + '%'
+                        if photo[photo.index('_') + 1 : len(photo) - 4] == 'C':
+                            direction = 'Coming'
+                        else:
+                            direction = 'Leaving'  
                         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                        # ticket[17 : 381, 19 : 272] = cv2.resize(img, (253, 364))
-                        # cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (355, 38), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
-                        # cv2.putText(ticket, '{} - {}%'.format(obj, confidence), (515, 81), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
-                        # cv2.putText(ticket, '{}'.format(photo[photo.index('_') + 1 : len(photo) - 4]), (393, 123), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
+                        
+                        if obj[ : len(obj) - 3] not in self.vehicles:
+                            if obj[ : len(obj) - 3] in self.other_object :
+                                status = 'ATTENTION: {} on the road'.format(obj[ : len(obj) - 3])
+                            else:
+                                status = 'ATTENTION: unknow object on the road'
+                        else:
+                            status = 'OK'
 
                     # Manage detection anomalies
                     else:
                         
-                        # No object detected
+                        # No object detected in the photo
                         if len(indexes) == 0:
 
-                            obj, confidence = '-'
-                            direction = photo[photo.index('_') + 1 : len(photo) - 4]
+                            obj = '-'
+                            confidence = ''
+                            if photo[photo.index('_') + 1 : len(photo) - 4] == 'C':
+                                direction = 'Coming'
+                            else:
+                                direction = 'Leaving'
+                            status = 'ERROR: no object detected'
 
-                        # Multiple object detected
+                        # Multiple object detected in the photo
                         else:
-                            print('Multiple object detection')
 
+                            for i in indexes.flatten():
+                                x, y, w, h = boxes[i]
+                                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                            
+                            obj = '-'
+                            confidence = ''
+                            if photo[photo.index('_') + 1 : len(photo) - 4] == 'C':
+                                direction = 'Coming'
+                            else:
+                                direction = 'Leaving'
+                            status = 'ERROR: multiple object detected'
+
+                    # Compile and generate the ticket 
                     ticket[17 : 381, 19 : 272] = cv2.resize(img, (253, 364))
-                    cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (355, 38), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
-                    cv2.putText(ticket, '{} - {}%'.format(obj, confidence), (515, 81), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
-                    cv2.putText(ticket, '{}'.format(direction), (393, 123), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 10, 10), 1)
+                    cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (355, 38), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                    cv2.putText(ticket, '{}{}'.format(obj, confidence), (515, 81), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                    cv2.putText(ticket, '{}'.format(direction), (393, 123), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                    cv2.putText(ticket, '{}'.format(status), (300, 280), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
 
-                    # Save new (generated) ticket
+                    # Save the ticket
                     cv2.imwrite('detections/{}.png'.format(len(os.listdir('detections')) + 1), ticket)
                     
-                    # Delete temporary frame
+                    # Delete original photo
                     os.remove('tmp/{}'.format(photo))
                     
             else:
-                ''' Set a dynamic value for sleep '''
                 time.sleep(5)
 
-#     def traffic_conditions(self):
-#         # Determina le condizioni del traffico
+    def timer(self, year, month, day, h, m, s):
 
-#     def speed_detector(self):
-#         # Determina le condizioni del traffico
+        # Update the timer on the camera screen
 
-run('video/camera_1.mp4', 1, 1)
+        if s < 59:
+            s += 1
+        else:
+            s = 0
+            if m < 59:
+                m += 1
+            else:
+                m = 0
+                if h < 23:
+                    h += 1
+                else:
+                    h = 0
+                    if day < calendar.monthrange(year, month)[1]:
+                        day += 1
+                    else:
+                        day = 1
+                        if month < 12:
+                            month += 1
+                        else:
+                            month = 1
+                            year += 1
+
+        if s < 10: s = '0' + str(s)
+        if m < 10: m = '0' + str(m)
+        if h < 10: h = '0' + str(h)
+        if day < 10: day = '0' + str(day)
+        if month < 10: month = '0' + str(month)
+        if year < 10: year = '0' + str(year)
+        
+        return year, month, day, h, m, s
+
+if __name__ == '__main__':
+
+    start('video/camera_1.mp4', 1, 1)
