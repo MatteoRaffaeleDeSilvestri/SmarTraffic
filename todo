@@ -1,0 +1,36 @@
+
+[ ] Powered by SmarTraffic in camera con il vero logo del programma (tanto il background ora c'è)
+
+[ ] Resume on the gui after see a video (or a prt of it)
+[ ] Make a GUI with Eel
+[ ] Make a CSV file as database reasume (make it downloadable - both CSV file and tickets)
+[ ] Reset the CSV file for every new video
+[ ] Fai una stima degli intervalli di timeout per il multiprocesing (3 e 5 sec lavorano bene)
+[ ] Prepara la presentazione ed il file README
+[ ] Prepara delle immagini per far vedere come il sistema gestisce le anomalie nei rilevameti (genera dei ticket Fac-simile)
+[ ] Resetta la cartella dei ticket ogni volta che si avvia un video 
+[ ] Riorganizza il sistema di directory
+
+NOTE:
+- Usa bootstrap per la GUI
+
+UTILITA':
+- Visione notturna 
+- Cambio/invasione di corsia
+- Sorpassi
+- Controllo elettronico della velocità
+- Velocità ideale per la marcia
+- Visione di più telecamere simultaneamente
+- Riconoscimento incidenti
+- Stime di interventi per la viabilità in base a momenti in cui il traffico si prevede sia minore
+
+OTTIMIZZAZIONI (tecniche):
+- Multiprocessing ottimizzato (refactoring totale del codice!)
+- Stima dinamica dei timeout dei processi in background basato su dati pregressi (es. lavora forte nei giorin d'estate e quasi nulla nelle notti invernali)
+- Uso di "pesi" allenati ad-hoc (yolo4.weights) per questo genere di letture
+
+OTTIMIZZAZIONI (generiche):
+- Uso di telecamere a 180° per lettura a doppia corsia più accurata
+- Maggiore supporto hardware (tecnologie cloud)
+- Sistama di lettura ad indirizzi IP invece del canonico circuito chiuso
+- Database per l'analisi e la lettura dei dati nel lungo periodo
