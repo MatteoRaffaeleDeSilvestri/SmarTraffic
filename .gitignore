@@ -2,10 +2,11 @@
 /coco.names
 /media
 /vGen
-/video
 /detections
 __pycache__/utilities.cpython-38.pyc
 __pycache__/main.cpython-38.pyc
 istockphoto-1167361237-612x612.jpg
 logo.png
 ticket.png
+Fonts_OpenCV.png
+ticket.xcf

@@ -6,6 +6,7 @@ import time
 import copy
 import os
 import calendar
+import csv
 
 # Import camera settings
 with open('CAMERA_SETTINGS.json', 'r') as f:
@@ -19,7 +20,7 @@ def start(source, dp, sts):
     classes = list()
     with open('yolo/coco.names', 'r') as f:
         classes = f.read().splitlines()
-
+    
     video = Video(net, classes, source, dp, sts)
 
     # Initialize process
@@ -27,8 +28,8 @@ def start(source, dp, sts):
     detect = multiprocessing.Process(target=video.detector)
 
     # Starting multiprocessing procedure
-    detect.start()
     play.start()
+    detect.start()
 
     while True:
         if play.exitcode == 0 and not len(os.listdir('tmp')):
@@ -58,37 +59,43 @@ class Video:
         source = self.camera
         capture = cv2.VideoCapture(source)
        
-        # Cam variables
+        # Camera variables
         passing_SX = False
         passing_DX = False
         vehicle_SX_ID = 0
         vehicle_DX_ID = 0
         vehicle_count_SX = 0
         vehicle_count_DX = 0
+        update_interval = 0
+        FPS = '-'
         
-        # Set timer 
+        # Set date and time
         date = CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"][ : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"].index('-') - 1].split('/')
         day = date[0]
         month = date[1]
         year = date[2]
         date = '{}/{}/{}'.format(day, month, year)
+        
         clock = CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"][CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"].index('-') + 2 : ].split(':')
         hh = int(clock[0])
         mm = int(clock[1])
         ss = int(clock[2])
         clock = '{}:{}:{}'.format(hh, mm, ss)
-        
-        update_interval = 0
-        FPS = '-'
 
         # Object detection from camera
         object_detector = cv2.createBackgroundSubtractorMOG2(history=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][0], varThreshold=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][1])
 
+        # CSV file
+        detection_data = open('data.csv', 'w')
+        vehicle_data = csv.writer(detection_data, delimiter=',')
+        vehicle_data.writerow(['VEHICLE_ID','AREA','DIRECTION','DATE','TIME'])
+        
         while True:
 
             ret, frame = capture.read()
 
             if not ret:
+                detection_data.close()
                 capture.release()
                 cv2.destroyAllWindows()
                 break
@@ -147,18 +154,20 @@ class Video:
             if passing_SX:
                 if not os.path.isfile('tmp/{}.png'.format(str(vehicle_SX_ID) + '_C')):
                     vehicle_count_SX += 1
-                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_SX_ID) + '_C' + '{}{}{}{}{}{}'.format(day, month, year, hh, mm, ss)), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][1],
-                                                                                                                                                        CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][3]])
+                    vehicle_data.writerow([vehicle_SX_ID, CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], 'Coming', '{}/{}/{}'.format(day, month, year), '{}:{}:{}'.format(hh, mm, ss)])
+                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_SX_ID) + '_C'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][1],
+                                                                                         CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][3]])
                 if self.detection_point:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                     (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (255, 255, 255), 2)
             
             # Take a picture of the right lane (ROI)
             if passing_DX:
-                if not os.path.isfile('tmp/{}.png'.format(str(vehicle_DX_ID) + '_L' + '{}{}{}{}{}{}'.format(day, month, year, hh, mm, ss))):
+                if not os.path.isfile('tmp/{}.png'.format(str(vehicle_DX_ID) + '_L')):
                     vehicle_count_DX += 1
-                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_DX_ID) + '_L' + '{}{}{}{}{}{}'.format(day, month, year, hh, mm, ss)), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][1],
-                                                                                            CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][3]])
+                    vehicle_data.writerow([vehicle_DX_ID, CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], 'Leaving', '{}/{}/{}'.format(day, month, year), '{}:{}:{}'.format(hh, mm, ss)])
+                    cv2.imwrite('tmp/{}.png'.format(str(vehicle_DX_ID) + '_L'), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][1],
+                                                                                         CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][3]])
                 if self.detection_point:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                     (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (255, 255, 255), 2)
@@ -172,6 +181,7 @@ class Video:
             
             # Wait for ESC key to stop
             if cv2.waitKey(30) == 27:
+                detection_data.close()
                 capture.release()
                 cv2.destroyAllWindows()
                 break
@@ -201,6 +211,11 @@ class Video:
 
         while True:
 
+            # CSV file
+            vehicle_data = open('data.csv', 'r')
+            for row in vehicle_data:
+                print(row.split(',')[0])
+            
             # Check if there are photo to analyse
             if len(os.listdir('tmp')):
 
@@ -208,7 +223,7 @@ class Video:
                 base = cv2.imread('ticket.png')
 
                 # Make detection for each photo
-                for photo in os.listdir('tmp'):
+                for photo in os.listdir('tmp')[:]:
                     
                     img = cv2.imread('tmp/{}'.format(photo))
                     height, width, _ = img.shape
@@ -257,7 +272,7 @@ class Video:
                        
                         obj = str(self.classes[class_ids[indexes.flatten()[0]]]) + ' - '
                         confidence = str(round(confidences[indexes.flatten()[0]] * 100, 1)) + '%'
-                        if photo[photo.index('_') + 1 : len(photo) - 4] == 'C':
+                        if photo[photo.index('_') + 1] == 'C':
                             direction = 'Coming'
                         else:
                             direction = 'Leaving'  
@@ -279,7 +294,7 @@ class Video:
 
                             obj = '-'
                             confidence = ''
-                            if photo[photo.index('_') + 1 : len(photo) - 4] == 'C':
+                            if photo[photo.index('_') + 1] == 'C':
                                 direction = 'Coming'
                             else:
                                 direction = 'Leaving'
@@ -294,7 +309,7 @@ class Video:
                             
                             obj = '-'
                             confidence = ''
-                            if photo[photo.index('_') + 1 : len(photo) - 4] == 'C':
+                            if photo[photo.index('_') + 1] == 'C':
                                 direction = 'Coming'
                             else:
                                 direction = 'Leaving'
@@ -303,6 +318,7 @@ class Video:
                     # Compile and generate the ticket 
                     ticket[17 : 381, 19 : 272] = cv2.resize(img, (253, 364))
                     cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (355, 38), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                    cv2.putText(ticket, '{}{}'.format(obj, confidence), (515, 81), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
                     cv2.putText(ticket, '{}{}'.format(obj, confidence), (515, 81), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
                     cv2.putText(ticket, '{}'.format(direction), (393, 123), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
                     cv2.putText(ticket, '{}'.format(status), (300, 280), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
@@ -314,7 +330,7 @@ class Video:
                     os.remove('tmp/{}'.format(photo))
                     
             else:
-                time.sleep(5)
+                time.sleep(3)
 
     def timer(self, year, month, day, h, m, s):
 
