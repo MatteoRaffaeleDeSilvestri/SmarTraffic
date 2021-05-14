@@ -172,7 +172,7 @@ class Video:
             passing_DX = False
             
             # Wait for ESC key to stop
-            if cv2.waitKey(30) == 27:
+            if cv2.waitKey(30) != -1:
                 capture.release()
                 cv2.destroyAllWindows()
                 break
@@ -207,133 +207,139 @@ class Video:
 
     def detector(self):
 
-        while True:
+        # Prepare CSV as database
+        with open('data.csv', 'w') as data:
+            data_input = csv.writer(data, delimiter=',')
 
-            # Check if there are photo to analyse
-            if len(os.listdir('.tmp')):
+            data_input(['VEHICLE_ID','AREA','DETECTION','DIRECTION','DATE','TIME','STATUS'])
+            
+            while True:
 
-                # Prepare the base for the ticket to generate
-                base = cv2.imread('img/ticket.png')
+                # Check if there are photo to analyse
+                if len(os.listdir('.tmp')):
 
-                # Make detection for each photo
-                for photo in os.listdir('.tmp')[:]:
-                    
-                    img = cv2.imread('.tmp/{}'.format(photo))
-                    height, width, _ = img.shape
+                    # Prepare the base for the ticket to generate
+                    base = cv2.imread('img/ticket.png')
 
-                    blob = cv2.dnn.blobFromImage(img, 1 / 255, (320, 320), (0, 0, 0), True, False)
- 
-                    self.net.setInput(blob)
- 
-                    output_layers_names = self.net.getUnconnectedOutLayersNames()
-                    layerOutputs = self.net.forward(output_layers_names)
- 
-                    boxes = []
-                    confidences = []
-                    class_ids = []
- 
-                    for output in layerOutputs:
- 
-                        for detection in output:
+                    # Make detection for each photo
+                    for photo in os.listdir('.tmp')[:]:
                         
-                            scores = detection[5 : ]
-                            class_id = numpy.argmax(scores)
-                            confidence = scores[class_id]
-                        
-                            if confidence > 0.5:
-                        
-                                center_x = int(detection[0] * width)
-                                center_y = int(detection[1] * height)
-                        
-                                w = int(detection[2] * width)
-                                h = int(detection[3] * height)
-                                x = int(center_x - w / 2)
-                                y = int(center_y - h / 2)
-                        
-                                boxes.append([x, y, w, h])
-                                confidences.append((float(confidence)))
-                                class_ids.append(class_id)
+                        img = cv2.imread('.tmp/{}'.format(photo))
+                        height, width, _ = img.shape
 
-                    indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
-
-                    ticket = base.copy()
-                    
-                    # One object detected in the photo
-                    if len(indexes) == 1:
-
-                        x, y, w, h = boxes[indexes.flatten()[0]]
-                    
-                        obj = str(self.classes[class_ids[indexes.flatten()[0]]]) + ' - '
-                        confidence = str(round(confidences[indexes.flatten()[0]] * 100, 1)) + '%'
-                        if photo[photo.index('_') + 1] == 'C':
-                            direction = 'Coming'
-                        else:
-                            direction = 'Leaving'  
-                        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                        
-                        if obj[ : len(obj) - 3] not in self.vehicles:
-                            if obj[ : len(obj) - 3] in self.other_object :
-                                status = 'ATTENTION: {} on the road'.format(obj[ : len(obj) - 3])
-                            else:
-                                status = 'ATTENTION: object on the road'
-                            status_color = (0, 43, 214)
-                        else:
-                            status = 'OK'
-                            status_color = (0, 179, 69)
-
-                    # Manage detection anomalies
-                    else:
-                        
-                        # No object detected in the photo
-                        if len(indexes) == 0:
-
-                            obj = '-'
-                            confidence = ''
-                            if photo[photo.index('_') + 1] == 'C':
-                                direction = 'Coming'
-                            else:
-                                direction = 'Leaving'
-                            status = 'ERROR: no object detected'
-                            status_color = (0, 179, 219)
-
-                        # Multiple object detected in the photo
-                        else:
-
-                            for i in indexes.flatten():
-                                x, y, w, h = boxes[i]
-                                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        blob = cv2.dnn.blobFromImage(img, 1 / 255, (320, 320), (0, 0, 0), True, False)
+    
+                        self.net.setInput(blob)
+    
+                        output_layers_names = self.net.getUnconnectedOutLayersNames()
+                        layerOutputs = self.net.forward(output_layers_names)
+    
+                        boxes = []
+                        confidences = []
+                        class_ids = []
+    
+                        for output in layerOutputs:
+    
+                            for detection in output:
                             
-                            obj = '-'
-                            confidence = ''
+                                scores = detection[5 : ]
+                                class_id = numpy.argmax(scores)
+                                confidence = scores[class_id]
+                            
+                                if confidence > 0.5:
+                            
+                                    center_x = int(detection[0] * width)
+                                    center_y = int(detection[1] * height)
+                            
+                                    w = int(detection[2] * width)
+                                    h = int(detection[3] * height)
+                                    x = int(center_x - w / 2)
+                                    y = int(center_y - h / 2)
+                            
+                                    boxes.append([x, y, w, h])
+                                    confidences.append((float(confidence)))
+                                    class_ids.append(class_id)
+
+                        indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+
+                        ticket = base.copy()
+                        
+                        # One object detected in the photo
+                        if len(indexes) == 1:
+
+                            x, y, w, h = boxes[indexes.flatten()[0]]
+                        
+                            obj = str(self.classes[class_ids[indexes.flatten()[0]]]) + ' - '
+                            confidence = str(round(confidences[indexes.flatten()[0]] * 100, 1)) + '%'
                             if photo[photo.index('_') + 1] == 'C':
                                 direction = 'Coming'
                             else:
-                                direction = 'Leaving'
-                            status = 'ERROR: multiple object detected'
-                            status_color = (0, 179, 219)
+                                direction = 'Leaving'  
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                            
+                            if obj[ : len(obj) - 3] not in self.vehicles:
+                                if obj[ : len(obj) - 3] in self.other_object :
+                                    status = 'ATTENTION: {} on the road'.format(obj[ : len(obj) - 3])
+                                else:
+                                    status = 'ATTENTION: object on the road'
+                                status_color = (0, 43, 214)
+                            else:
+                                status = 'OK'
+                                status_color = (0, 179, 69)
 
-                    # Compile and generate the ticket 
-                    ticket[17 : 381, 19 : 272] = cv2.resize(img, (253, 364))
-                    cv2.putText(ticket, '{}'.format(photo[ : photo.index('_')]), (415, 39), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1) 
-                    cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (354, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
-                    cv2.putText(ticket, '{}{}'.format(obj, confidence), (418, 122), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
-                    cv2.putText(ticket, '{}'.format(direction), (408, 163), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
-                    cv2.putText(ticket, '{}/{}/{}'.format(photo[photo.index('_') + 2 : photo.index('_') + 4], 
-                                                          photo[photo.index('_') + 4 : photo.index('_') + 6],
-                                                          photo[photo.index('_') + 6 : photo.index('_') + 10]), (355, 203), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
-                    cv2.putText(ticket, '{}:{}:{}'.format(photo[photo.index('_') + 10 : photo.index('_') + 12], 
-                                                          photo[photo.index('_') + 12 : photo.index('_') + 14],
-                                                          photo[photo.index('_') + 14 : photo.index('_') + 16]), (361, 244), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
-                    cv2.putText(ticket, '{}'.format(status), (370, 286), cv2.FONT_HERSHEY_SIMPLEX, 0.8, status_color, 2)
+                        # Manage detection anomalies
+                        else:
+                            
+                            # No object detected in the photo
+                            if len(indexes) == 0:
 
-                    # Save the ticket
-                    cv2.imwrite('detections/ticket_{}.png'.format(len(os.listdir('detections')) + 1), ticket)
-                    
-                    # Delete original photo
-                    os.remove('.tmp/{}'.format(photo))
-                    
-            else:
-                time.sleep(3)
+                                obj = '-'
+                                confidence = ''
+                                if photo[photo.index('_') + 1] == 'C':
+                                    direction = 'Coming'
+                                else:
+                                    direction = 'Leaving'
+                                status = 'ERROR: no object detected'
+                                status_color = (0, 179, 219)
+
+                            # Multiple object detected in the photo
+                            else:
+
+                                for i in indexes.flatten():
+                                    x, y, w, h = boxes[i]
+                                    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                                
+                                obj = '-'
+                                confidence = ''
+                                if photo[photo.index('_') + 1] == 'C':
+                                    direction = 'Coming'
+                                else:
+                                    direction = 'Leaving'
+                                status = 'ERROR: multiple object detected'
+                                status_color = (0, 179, 219)
+
+                        # Compile and generate the ticket 
+                        ticket[17 : 381, 19 : 272] = cv2.resize(img, (253, 364))
+                        cv2.putText(ticket, '{}'.format(photo[ : photo.index('_')]), (415, 39), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1) 
+                        cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (354, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                        cv2.putText(ticket, '{}{}'.format(obj, confidence), (418, 122), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                        cv2.putText(ticket, '{}'.format(direction), (408, 163), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                        cv2.putText(ticket, '{}/{}/{}'.format(photo[photo.index('_') + 2 : photo.index('_') + 4], 
+                                                            photo[photo.index('_') + 4 : photo.index('_') + 6],
+                                                            photo[photo.index('_') + 6 : photo.index('_') + 10]), (355, 203), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                        cv2.putText(ticket, '{}:{}:{}'.format(photo[photo.index('_') + 10 : photo.index('_') + 12], 
+                                                            photo[photo.index('_') + 12 : photo.index('_') + 14],
+                                                            photo[photo.index('_') + 14 : photo.index('_') + 16]), (361, 244), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                        cv2.putText(ticket, '{}'.format(status), (370, 286), cv2.FONT_HERSHEY_SIMPLEX, 0.8, status_color, 2)
+
+                        # Save the ticket
+                        cv2.imwrite('detections/ticket_{}.png'.format(len(os.listdir('detections')) + 1), ticket)
+                        
+                        # Delete original photo
+                        os.remove('.tmp/{}'.format(photo))
+                        
+                else:
+                    time.sleep(3)
 
     def timer(self, year, month, day, h, m, s):
 
