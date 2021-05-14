@@ -59,6 +59,9 @@ class Video:
 
     def play(self):
 
+        # Set logo
+        logo_mini = cv2.imread('img/logo_mini.png')
+
         # Take video frome source 
         source = self.camera
         capture = cv2.VideoCapture(source)
@@ -190,19 +193,18 @@ class Video:
                 update_interval = 0
 
             # Project name
-            cv2.rectangle(frame, (5, 775), (290, 805), (200, 200, 200), -1)
-
-            cv2.putText(frame, 'Powered by SmarTraffic', (10, 797), cv2.FONT_HERSHEY_DUPLEX, 0.7, (10, 10, 10), 1)
+            cv2.rectangle(frame, (5, 775), (1075, 805), (230, 230, 230), -1)
+            cv2.putText(frame, 'Powered by', (10, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
+            frame[777 : 804 , 145 : 244] = logo_mini
+            cv2.putText(frame, '{}/{}/{} - {}:{}:{}'.format(day, month, year, hh, mm, ss), (788, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
 
             # Display live statistics on the screen 
             if self.stats:
                 cv2.rectangle(frame, (5, 5), (160, 105), (200, 200, 200), -1)
-                cv2.putText(frame, 'FPS: {}'.format(FPS), (8, 25), cv2.FONT_HERSHEY_PLAIN, 1.5, (10, 10, 10), 1)
-                cv2.putText(frame, 'Coming: {}'.format(vehicle_count_SX), (8, 50), cv2.FONT_HERSHEY_PLAIN, 1.5, (10, 10, 10), 1)
-                cv2.putText(frame, 'Leaving: {}'.format(vehicle_count_DX), (8, 75), cv2.FONT_HERSHEY_PLAIN, 1.5, (10, 10, 10), 1)
-                cv2.putText(frame, 'Total: {}'.format(vehicle_count_SX + vehicle_count_DX), (8, 100), cv2.FONT_HERSHEY_PLAIN, 1.5, (10, 10, 10), 1)
-                cv2.rectangle(frame, (780, 775), (1075, 805), (200, 200, 200), -1)
-                cv2.putText(frame, '{}/{}/{} - {}:{}:{}'.format(day, month, year, hh, mm, ss), (788, 797), cv2.FONT_HERSHEY_DUPLEX, 0.7, (10, 10, 10), 1)
+                cv2.putText(frame, 'FPS: {}'.format(FPS), (8, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
+                cv2.putText(frame, 'Coming: {}'.format(vehicle_count_SX), (8, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
+                cv2.putText(frame, 'Leaving: {}'.format(vehicle_count_DX), (8, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
+                cv2.putText(frame, 'Total: {}'.format(vehicle_count_SX + vehicle_count_DX), (8, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
 
             # Show the video (and layer)
             cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], frame)
@@ -323,16 +325,16 @@ class Video:
 
                     # Compile and generate the ticket 
                     ticket[17 : 381, 19 : 272] = cv2.resize(img, (253, 364))
-                    cv2.putText(ticket, '{}'.format(photo[ : photo.index('_')]), (415, 39), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1) 
-                    cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (354, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
-                    cv2.putText(ticket, '{}{}'.format(obj, confidence), (417, 122), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
-                    cv2.putText(ticket, '{}'.format(direction), (408, 163), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                    cv2.putText(ticket, '{}'.format(photo[ : photo.index('_')]), (415, 39), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1) 
+                    cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (354, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
+                    cv2.putText(ticket, '{}{}'.format(obj, confidence), (417, 122), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
+                    cv2.putText(ticket, '{}'.format(direction), (408, 163), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
                     cv2.putText(ticket, '{}/{}/{}'.format(photo[photo.index('_') + 2 : photo.index('_') + 4], 
                                                         photo[photo.index('_') + 4 : photo.index('_') + 6],
-                                                        photo[photo.index('_') + 6 : photo.index('_') + 10]), (355, 203), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                                                        photo[photo.index('_') + 6 : photo.index('_') + 10]), (355, 203), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
                     cv2.putText(ticket, '{}:{}:{}'.format(photo[photo.index('_') + 10 : photo.index('_') + 12], 
                                                         photo[photo.index('_') + 12 : photo.index('_') + 14],
-                                                        photo[photo.index('_') + 14 : photo.index('_') + 16]), (361, 244), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (10, 10, 10), 1)
+                                                        photo[photo.index('_') + 14 : photo.index('_') + 16]), (361, 244), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
                     cv2.putText(ticket, '{}'.format(status), (370, 286), cv2.FONT_HERSHEY_SIMPLEX, 0.8, status_color, 2)
 
                     # Save the ticket
