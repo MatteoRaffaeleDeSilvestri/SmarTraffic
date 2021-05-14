@@ -54,12 +54,12 @@ class Video:
         # Type of vehicle that can be seen on the road
         self.vehicles = {'Bicycle', 'Car', 'Motorbike', 'Bus', 'Truck', 'Boat'}
 
-        # Common thing to be aware of during drive (other person and animals in general)
-        self.other_object = {'Person', 'Cat', 'Dog', 'Horse', 'Sheep', 'Cow', 'Bear'}
+        # Common thing to be aware of during drive (other person and animals mostly)
+        self.other_object = {'Person', 'Cat', 'Dog', 'Horse', 'Sheep', 'Cow', 'Bear', 'Bird'}
 
     def play(self):
 
-        # Set logo
+        # Set mini logo fro camera screen
         logo_mini = cv2.imread('img/logo_mini.png')
 
         # Take video frome source 
@@ -78,16 +78,9 @@ class Video:
         
         # Set date and time
         date = CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"][ : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"].index('-') - 1].split('/')
-        day = date[0]
-        month = date[1]
-        year = date[2]
-        date = '{}/{}/{}'.format(day, month, year)
-        
         clock = CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"][CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"].index('-') + 2 : ].split(':')
-        hh = int(clock[0])
-        mm = int(clock[1])
-        ss = int(clock[2])
-        clock = '{}:{}:{}'.format(hh, mm, ss)
+
+        year, month, day, hh, mm, ss = Video.timer(self,  int(date[2]),  int(date[1]), int(date[0]), int(clock[0]), int(clock[1]),int(clock[2]))
 
         # Object detection from camera
         object_detector = cv2.createBackgroundSubtractorMOG2(history=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][0], varThreshold=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][1])
@@ -101,11 +94,13 @@ class Video:
                 cv2.destroyAllWindows()
                 break
             
-            start_update = time.time()
-
+            # Keep a "clean" copy of the frame for detection
             original = copy.deepcopy(frame)
 
-            # Define region of interest (ROI)
+            # Start the timer for update the info on the screen
+            start_update = time.time()
+
+            # Define regions of interest (ROI)
             roi_SX = frame[CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][1],
                            CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][3]]
             roi_DX = frame[CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_DX"][1],
@@ -115,7 +110,7 @@ class Video:
             mask_SX = object_detector.apply(roi_SX)
             mask_DX = object_detector.apply(roi_DX)
 
-            # Remove shadow and expand detection in the image
+            # Remove "noise" in the image
             _, mask_SX = cv2.threshold(mask_SX, 254, 255, cv2.THRESH_BINARY)
             _, mask_DX = cv2.threshold(mask_DX, 254, 255, cv2.THRESH_BINARY)
 
@@ -123,27 +118,28 @@ class Video:
             contours_SX, _ = cv2.findContours(mask_SX, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             contours_DX, _ = cv2.findContours(mask_DX, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             
-            # Draw contours
+            # Find contours SX
             for contours in contours_SX:
 
-                # Calculate areas and remove small elements
+                # Check areas and ignore small elements
                 if cv2.contourArea(contours) >= CAMERA_SETTINGS[source[6 : len(source) - 4]]["Surface"]:
                     
                     x, y, w, h = cv2.boundingRect(contours)
 
                     # Animate detection point
-                    if CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1] in range(CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] + y, CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] + y + h):
+                    if CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] + y <= CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1] <= CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] + y + h:
                         passing_SX = True
 
+            # Find contours DX
             for contours in contours_DX:
 
-                # Calculate areas and remove small elements
+                  # Check areas and ignore small elements
                 if cv2.contourArea(contours) >= CAMERA_SETTINGS[source[6 : len(source) - 4]]["Surface"]:
                     
                     x, y, w, h = cv2.boundingRect(contours)
                     
                     # Animate detection point
-                    if CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1] in range(CAMERA_SETTINGS[source[6 :len(source) - 4]]["ROI_SX"][0] + y, CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] + y + h):
+                    if CAMERA_SETTINGS[source[6 :len(source) - 4]]["ROI_DX"][0] + y <= CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1] <= CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_DX"][0] + y + h:
                         passing_DX = True
 
             # Draw detection point
@@ -157,6 +153,8 @@ class Video:
                     vehicle_count_SX += 1
                     cv2.imwrite('.tmp/{}.png'.format(str(vehicle_SX_ID) + '_C' + '{}{}{}{}{}{}'.format(day, month, year, hh, mm, ss)), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][1],
                                                                                                                                                CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_SX"][3]])
+                
+                # Animate detection point 
                 if self.detection_point:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                     (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (255, 255, 255), 2)
@@ -167,6 +165,8 @@ class Video:
                     vehicle_count_DX += 1
                     cv2.imwrite('.tmp/{}.png'.format(str(vehicle_DX_ID) + '_L' + '{}{}{}{}{}{}'.format(day, month, year, hh, mm, ss)), original[CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][1],
                                                                                                                                                CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Area_DX"][3]])
+                
+                # Animate detection point 
                 if self.detection_point:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                     (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (255, 255, 255), 2)
@@ -192,9 +192,10 @@ class Video:
                 year, month, day, hh, mm, ss = Video.timer(self, int(year), int(month), int(day), int(hh), int(mm), int(ss))
                 update_interval = 0
 
-            # Project name
+            # Default camera info
             cv2.rectangle(frame, (5, 775), (1075, 805), (230, 230, 230), -1)
             cv2.putText(frame, 'Powered by', (10, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
+            cv2.putText(frame, 'Press any key to stop the video', (280, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)
             frame[777 : 804 , 145 : 244] = logo_mini
             cv2.putText(frame, '{}/{}/{} - {}:{}:{}'.format(day, month, year, hh, mm, ss), (788, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
 
@@ -215,7 +216,7 @@ class Video:
 
         # Prepare CSV as database
         with open('data.csv', 'w') as data:
-            data_input = csv.writer(data, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            data_input = csv.writer(data, delimiter=',')
             data_input.writerow(['VEHICLE_ID', 'AREA', 'DETECTION', 'CONFIDENCE', 'DIRECTION', 'DATE', 'TIME', 'STATUS'])
             
         while True:
@@ -342,7 +343,7 @@ class Video:
 
                     # Add record to CSV database
                     with open('data.csv', 'a') as data:
-                        data_input = csv.writer(data, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                        data_input = csv.writer(data, delimiter=',')
                         data_input.writerow([photo[ : photo.index('_')],
                                             CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"],
                                             obj[ : len(obj) - 3],
@@ -361,7 +362,6 @@ class Video:
     def timer(self, year, month, day, h, m, s):
 
         # Update the timer on the camera screen
-
         if s < 59:
             s += 1
         else:
@@ -383,7 +383,8 @@ class Video:
                         else:
                             month = 1
                             year += 1
-
+        
+        # Normalise values before returning
         if s < 10: s = '0' + str(s)
         if m < 10: m = '0' + str(m)
         if h < 10: h = '0' + str(h)
