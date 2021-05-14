@@ -6,5 +6,3 @@ VEHICLE_ID,AREA,DETECTION,CONFIDENCE,DIRECTION,DATE,TIME,STATUS
 474,Via Fondi-Sperlonga,Car,99.6%,Coming,08/05/2021,17:46:03,OK
 703,Via Fondi-Sperlonga,Car,99.6%,Coming,08/05/2021,17:46:14,OK
 1467,Via Fondi-Sperlonga,Person,77.3%,Leaving,08/05/2021,17:46:48,ATTENTION: Person on the road
-1637,Via Fondi-Sperlonga,Car,98.9%,Coming,08/05/2021,17:46:57,OK
-1673,Via Fondi-Sperlonga,Car,99.2%,Coming,08/05/2021,17:46:59,OK

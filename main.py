@@ -39,7 +39,7 @@ def start(source, dp, sts):
         if play.exitcode == 0 and not len(os.listdir('.tmp')):
             os.kill(detect.pid, 9)
             break
-        time.sleep(3)
+        time.sleep(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Timeout"])
 
 class Video:
 
@@ -195,7 +195,7 @@ class Video:
             # Default camera info
             cv2.rectangle(frame, (5, 775), (1075, 805), (230, 230, 230), -1)
             cv2.putText(frame, 'Powered by', (10, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
-            cv2.putText(frame, 'Press any key to stop the video', (280, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)
+            cv2.putText(frame, 'Press any key to stop the video', (345, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 1)
             frame[777 : 804 , 145 : 244] = logo_mini
             cv2.putText(frame, '{}/{}/{} - {}:{}:{}'.format(day, month, year, hh, mm, ss), (788, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
 
@@ -357,7 +357,7 @@ class Video:
                     os.remove('.tmp/{}'.format(photo))
                     
             else:
-                time.sleep(3)
+                time.sleep(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Timeout"])
 
     def timer(self, year, month, day, h, m, s):
 
@@ -396,4 +396,4 @@ class Video:
 
 if __name__ == '__main__':
 
-    start('video/camera_1.mp4', 1, 1)
+    start('video/camera_1.mp4', 0, 0)

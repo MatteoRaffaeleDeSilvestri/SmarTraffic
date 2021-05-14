@@ -1,11 +1,8 @@
 ☐ Resume on the gui after see a video (or a prt of it)
 ☐ Make a GUI with Eel
 ☐ Make CSV downloadable - both CSV file and tickets
-☐ Fai una stima degli intervalli di timeout per il multiprocesing (3 e 5 sec lavorano bene) - usa il file CAMERA_SETTINGS
 ☐ Prepara la presentazione ed il file README
-☐ Prepara delle immagini per far vedere come il sistema gestisce le anomalie nei rilevameti (genera dei ticket Fac-simile)
 ☐ Passa il carico di yolov4cfg, yolov4.weights e coco.names nell'apertura dell'app (GUI), non all'avvio di ogni video
-
 ☐ Usa bootstrap per la GUI
 
 - Visione notturna 
@@ -25,10 +22,13 @@
 - Maggiore supporto hardware (tecnologie cloud)
 - Sistama di lettura ad indirizzi IP invece del canonico circuito chiuso
 - Database per l'analisi e la lettura dei dati nel lungo periodo
+- Agevolare l'inserimento di nuove videocamere tramite il documento CAMERA_SETTINGS
 
 ☐ GENERAL CONDE REVIEW
 
 Archive:
+  ✔ Prepara delle immagini per far vedere come il sistema gestisce le anomalie nei rilevameti (genera dei ticket Fac-simile) @started(21-05-14 16:29) @done(21-05-14 16:40) @lasted(11m28s)
+  ✔ Fai una stima degli intervalli di timeout per il multiprocesing (3 e 5 sec lavorano bene) - usa il file CAMERA_SETTINGS @done(21-05-14 16:27)
   ✔ Powered by SmarTraffic in camera con il vero logo del programma (tanto il background ora c'è) @done(21-05-14 13:27)
   ✘ Altro font per opencv @cancelled(21-05-14 13:00)
   ✔ Make a CSV file as database reasume @done(21-05-14 12:21)
