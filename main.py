@@ -7,12 +7,13 @@ import copy
 import os
 import calendar
 import csv
+import tkinter as tk
 
 # Import camera settings
 with open('CAMERA_SETTINGS.json', 'r') as f:
     CAMERA_SETTINGS = json.load(f)
 
-def start(source, dp, sts):
+def run(source, dp, sts):
 
     # Prepare the object recognition system (YOLOv4)
     net = cv2.dnn.readNet('yolo/yolov4.weights', 'yolo/yolov4.cfg')
@@ -36,9 +37,11 @@ def start(source, dp, sts):
     detect.start()
 
     while True:
-        if play.exitcode == 0 and not len(os.listdir('.tmp')):
-            os.kill(detect.pid, 9)
-            break
+        if play.exitcode == 0:
+            if not len(os.listdir('.tmp')):
+                GUI.checking_ticket()
+                os.kill(detect.pid, 9)
+                break
         time.sleep(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Timeout"])
 
 class Video:
@@ -230,9 +233,11 @@ class Video:
                 # Make detection for each photo
                 for photo in os.listdir('.tmp')[:]:
                     
+                    # Take photo size
                     img = cv2.imread('.tmp/{}'.format(photo))
                     height, width, _ = img.shape
 
+                    # Prepare for object recognition
                     blob = cv2.dnn.blobFromImage(img, 1 / 255, (320, 320), (0, 0, 0), True, False)
 
                     self.net.setInput(blob)
@@ -251,9 +256,11 @@ class Video:
                             scores = detection[5 : ]
                             class_id = numpy.argmax(scores)
                             confidence = scores[class_id]
+
+                            # Set the minimum level of confidence at 50%
+                            if confidence >= 0.5:
                         
-                            if confidence > 0.5:
-                        
+                                # Get object size
                                 center_x = int(detection[0] * width)
                                 center_y = int(detection[1] * height)
                         
@@ -268,6 +275,7 @@ class Video:
 
                     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
+                    # Get ticket image base to fill with informations
                     ticket = base.copy()
                     
                     # One object detected in the photo
@@ -341,6 +349,10 @@ class Video:
                     # Save the ticket
                     cv2.imwrite('detections/ticket_{}.png'.format(len(os.listdir('detections')) + 1), ticket)
 
+                    # Update ticket on the GUI
+                    # TODO
+                    GUI.checking_ticket(self)
+
                     # Add record to CSV database
                     with open('data.csv', 'a') as data:
                         data_input = csv.writer(data, delimiter=',')
@@ -357,6 +369,7 @@ class Video:
                     os.remove('.tmp/{}'.format(photo))
                     
             else:
+                
                 time.sleep(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Timeout"])
 
     def timer(self, year, month, day, h, m, s):
@@ -394,6 +407,104 @@ class Video:
         
         return year, month, day, h, m, s
 
-if __name__ == '__main__':
+class GUI:
 
-    start('video/camera_1.mp4', 0, 0)
+    cameras = {
+            'Camera 1 - Via Fondi-Sperlonga': 'camera_1.mp4',
+            'Camera 2 - Via Appia Lato Itri': 'camera_2.mp4',
+            'Camera 3 - SR637': 'camera_3.mp4',
+            'Camera 4 - SS7': 'camera_4.mp4',
+    }
+
+    def __init__(self):
+
+        # Prepare the object recognition system (YOLOv4)
+        self.net = cv2.dnn.readNet('yolo/yolov4.weights', 'yolo/yolov4.cfg')
+        
+        self.classes = list()
+        with open('yolo/coco.names', 'r') as f:
+            self.classes = f.read().splitlines()
+
+        # Delete existing ticket (if present)
+        for ticket in os.listdir('detections')[:]:
+            os.remove('detections/{}'.format(ticket))
+
+        # Set window propriety
+        self.root = tk.Tk()
+        self.root.title('Smart Traffic')
+        self.root.resizable(False, False)
+
+        # Show logo
+        logo = tk.Canvas(self.root, width=445, height=120)
+        logo.grid(row=0, padx=20, pady=30)
+        logo_img = tk.PhotoImage(file='img/logo.png')
+        logo.create_image(0, 0, anchor='nw', image=logo_img)
+
+        lbl = tk.Label(self.root, font='Lato', text='Benvenuto in SmarTraffic.\nSeleziona una delle telecamere presenti dal menù in basso\ne premi Play.', padx=20, pady=10).grid(columnspan=2, row=1)
+ 
+        # Initialise and show dropdown menù
+        sources = [video for video in self.cameras.keys()]
+
+        variable = tk.StringVar(self.root)
+        variable.set(sources[0])
+        dropdown_menu = tk.OptionMenu(self.root, variable, *sources).grid(row=2, padx=10, sticky='w')
+
+        dp = tk.IntVar()
+        box = tk.Checkbutton(self.root, text='Mostra punti di rilevamento', variable=dp).grid(row=3, padx=10, sticky='w')
+
+        sts = tk.IntVar()
+        box = tk.Checkbutton(self.root, text='Mostra statistiche live', variable=sts).grid(row=4, padx=10, sticky='w')
+
+        self.play_btn = tk.Button(self.root, text='Play', command=lambda: GUI.play_update(self, variable, dp, sts)).grid(row=5, pady=10)
+
+        # Start main loop (GUI)
+        self.root.mainloop()
+    
+    def play_update(self, variable, dp, sts):
+
+        # Start video detection
+        self.play_btn = tk.Button(self.root, text='Play', state='disabled').grid(row=5, pady=10)
+        self.root.update()
+
+        # GUI.checking_ticket(self, variable.get())
+        GUI.run(self, 'video/{}'.format(self.cameras[variable.get()]), dp.get(), sts.get())
+        
+        self.play_btn = tk.Button(self.root, text='Play', command=lambda: GUI.play_update(self, variable, dp, sts)).grid(row=5, pady=10)
+        self.root.update()
+
+    def run(self, source, dp, sts):
+
+        video = Video(self.net, self.classes, source, dp, sts)
+
+        # Initialize process
+        play = multiprocessing.Process(target=video.play)
+        detect = multiprocessing.Process(target=video.detector)
+
+        # Starting multiprocessing procedure
+        play.start()
+        detect.start()
+
+        while True:
+            if play.exitcode == 0:
+                if not len(os.listdir('.tmp')):
+                    # GUI.checking_ticket(self)
+                    os.kill(detect.pid, 9)
+                    break
+            time.sleep(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Timeout"])
+
+    def checking_ticket(self):
+
+        print(os.listdir('detections'))
+
+            # Waiting time
+            # time.sleep(CAMERA_SETTINGS[self.cameras[variable][: len(self.cameras[variable]) - 4]]["Timeout"])
+
+if __name__ == '__main__':
+    
+    GUI()
+
+    # run('video/camera_1.mp4', 0, 0)
+
+    # def Openfolder(x):
+    #     print(x)
+    #     webbrowser.open('analysed')
