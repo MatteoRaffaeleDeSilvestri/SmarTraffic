@@ -1,48 +1,18 @@
+import os
 import cv2
-import numpy
-import multiprocessing
+import csv
 import json
 import time
 import copy
-import os
+import numpy
 import calendar
-import csv
 import tkinter as tk
+import multiprocessing
+from tkinter import font as tkFont
 
 # Import camera settings
 with open('CAMERA_SETTINGS.json', 'r') as f:
     CAMERA_SETTINGS = json.load(f)
-
-def run(source, dp, sts):
-
-    # Prepare the object recognition system (YOLOv4)
-    net = cv2.dnn.readNet('yolo/yolov4.weights', 'yolo/yolov4.cfg')
-    
-    classes = list()
-    with open('yolo/coco.names', 'r') as f:
-        classes = f.read().splitlines()
-
-    # Delete existing ticket (if present)
-    for ticket in os.listdir('detections')[:]:
-        os.remove('detections/{}'.format(ticket))
-    
-    video = Video(net, classes, source, dp, sts)
-
-    # Initialize process
-    play = multiprocessing.Process(target=video.play)
-    detect = multiprocessing.Process(target=video.detector)
-
-    # Starting multiprocessing procedure
-    play.start()
-    detect.start()
-
-    while True:
-        if play.exitcode == 0:
-            if not len(os.listdir('.tmp')):
-                GUI.checking_ticket()
-                os.kill(detect.pid, 9)
-                break
-        time.sleep(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Timeout"])
 
 class Video:
 
@@ -129,7 +99,7 @@ class Video:
                     
                     x, y, w, h = cv2.boundingRect(contours)
 
-                    # Animate detection point
+                    # Activate detection point
                     if CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] + y <= CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1] <= CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] + y + h:
                         passing_SX = True
 
@@ -141,7 +111,7 @@ class Video:
                     
                     x, y, w, h = cv2.boundingRect(contours)
                     
-                    # Animate detection point
+                    # Activate detection point
                     if CAMERA_SETTINGS[source[6 :len(source) - 4]]["ROI_DX"][0] + y <= CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1] <= CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_DX"][0] + y + h:
                         passing_DX = True
 
@@ -215,12 +185,13 @@ class Video:
             # cv2.imshow('Left lane', mask_SX)
             # cv2.imshow('Right lane', mask_DX)
 
-    def detector(self):
+    def detector(self, tkt, CSV):
 
         # Prepare CSV as database
-        with open('data.csv', 'w') as data:
-            data_input = csv.writer(data, delimiter=',')
-            data_input.writerow(['VEHICLE_ID', 'AREA', 'DETECTION', 'CONFIDENCE', 'DIRECTION', 'DATE', 'TIME', 'STATUS'])
+        if CSV:
+            with open('data.csv', 'w') as data:
+                data_input = csv.writer(data, delimiter=',')
+                data_input.writerow(['VEHICLE_ID', 'AREA', 'DETECTION', 'CONFIDENCE', 'DIRECTION', 'DATE', 'TIME', 'STATUS'])
             
         while True:
 
@@ -282,14 +253,13 @@ class Video:
                     if len(indexes) == 1:
 
                         x, y, w, h = boxes[indexes.flatten()[0]]
-                    
+
                         obj = str(self.classes[class_ids[indexes.flatten()[0]]]) + ' - '
                         confidence = str(round(confidences[indexes.flatten()[0]] * 100, 1)) + '%'
                         if photo[photo.index('_') + 1] == 'C':
                             direction = 'Coming'
                         else:
-                            direction = 'Leaving'  
-                        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                            direction = 'Leaving' 
                         
                         if obj[ : len(obj) - 3] not in self.vehicles:
                             if obj[ : len(obj) - 3] in self.other_object :
@@ -300,6 +270,8 @@ class Video:
                         else:
                             status = 'OK'
                             status_color = (0, 179, 69)
+
+                        cv2.rectangle(img, (x, y), (x + w, y + h), status_color, 2)
 
                     # Manage detection anomalies
                     else:
@@ -319,10 +291,6 @@ class Video:
                         # Multiple object detected in the photo
                         else:
 
-                            for i in indexes.flatten():
-                                x, y, w, h = boxes[i]
-                                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                            
                             obj = '-'
                             confidence = ''
                             if photo[photo.index('_') + 1] == 'C':
@@ -332,38 +300,44 @@ class Video:
                             status = 'ERROR: multiple object detected'
                             status_color = (0, 179, 219)
 
+                            for i in indexes.flatten():
+                                x, y, w, h = boxes[i]
+                                cv2.rectangle(img, (x, y), (x + w, y + h), status_color, 2)
+                    
                     # Compile and generate the ticket 
-                    ticket[17 : 381, 19 : 272] = cv2.resize(img, (253, 364))
-                    cv2.putText(ticket, '{}'.format(photo[ : photo.index('_')]), (415, 39), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1) 
-                    cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (354, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
-                    cv2.putText(ticket, '{}{}'.format(obj, confidence), (417, 122), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
-                    cv2.putText(ticket, '{}'.format(direction), (408, 163), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
-                    cv2.putText(ticket, '{}/{}/{}'.format(photo[photo.index('_') + 2 : photo.index('_') + 4], 
-                                                        photo[photo.index('_') + 4 : photo.index('_') + 6],
-                                                        photo[photo.index('_') + 6 : photo.index('_') + 10]), (355, 203), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
-                    cv2.putText(ticket, '{}:{}:{}'.format(photo[photo.index('_') + 10 : photo.index('_') + 12], 
-                                                        photo[photo.index('_') + 12 : photo.index('_') + 14],
-                                                        photo[photo.index('_') + 14 : photo.index('_') + 16]), (361, 244), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
-                    cv2.putText(ticket, '{}'.format(status), (370, 286), cv2.FONT_HERSHEY_SIMPLEX, 0.8, status_color, 2)
+                    if tkt:
 
-                    # Save the ticket
-                    cv2.imwrite('detections/ticket_{}.png'.format(len(os.listdir('detections')) + 1), ticket)
+                        ticket[17 : 381, 19 : 272] = cv2.resize(img, (253, 364))
+                        cv2.putText(ticket, '{}'.format(photo[ : photo.index('_')]), (415, 39), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1) 
+                        cv2.putText(ticket, '{}'.format(CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"]), (354, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
+                        cv2.putText(ticket, '{}{}'.format(obj, confidence), (417, 122), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
+                        cv2.putText(ticket, '{}'.format(direction), (408, 163), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
+                        cv2.putText(ticket, '{}/{}/{}'.format(photo[photo.index('_') + 2 : photo.index('_') + 4], 
+                                                            photo[photo.index('_') + 4 : photo.index('_') + 6],
+                                                            photo[photo.index('_') + 6 : photo.index('_') + 10]), (355, 203), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
+                        cv2.putText(ticket, '{}:{}:{}'.format(photo[photo.index('_') + 10 : photo.index('_') + 12], 
+                                                            photo[photo.index('_') + 12 : photo.index('_') + 14],
+                                                            photo[photo.index('_') + 14 : photo.index('_') + 16]), (361, 244), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
+                        cv2.putText(ticket, '{}'.format(status), (370, 286), cv2.FONT_HERSHEY_SIMPLEX, 0.8, status_color, 2)
+
+                        # Save the ticket
+                        cv2.imwrite('detections/ticket_{}.png'.format(len(os.listdir('detections')) + 1), ticket)
 
                     # Update ticket on the GUI
-                    # TODO
                     GUI.checking_ticket(self)
 
                     # Add record to CSV database
-                    with open('data.csv', 'a') as data:
-                        data_input = csv.writer(data, delimiter=',')
-                        data_input.writerow([photo[ : photo.index('_')],
-                                            CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"],
-                                            obj[ : len(obj) - 3],
-                                            confidence,
-                                            direction, 
-                                            '{}/{}/{}'.format(photo[photo.index('_') + 2 : photo.index('_') + 4], photo[photo.index('_') + 4 : photo.index('_') + 6], photo[photo.index('_') + 6 : photo.index('_') + 10]),
-                                            '{}:{}:{}'.format(photo[photo.index('_') + 10 : photo.index('_') + 12], photo[photo.index('_') + 12 : photo.index('_') + 14], photo[photo.index('_') + 14 : photo.index('_') + 16]),
-                                            status])
+                    if CSV:
+                        with open('data.csv', 'a') as data:
+                            data_input = csv.writer(data, delimiter=',')
+                            data_input.writerow([photo[ : photo.index('_')],
+                                                CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"],
+                                                obj[ : len(obj) - 3],
+                                                confidence,
+                                                direction, 
+                                                '{}/{}/{}'.format(photo[photo.index('_') + 2 : photo.index('_') + 4], photo[photo.index('_') + 4 : photo.index('_') + 6], photo[photo.index('_') + 6 : photo.index('_') + 10]),
+                                                '{}:{}:{}'.format(photo[photo.index('_') + 10 : photo.index('_') + 12], photo[photo.index('_') + 12 : photo.index('_') + 14], photo[photo.index('_') + 14 : photo.index('_') + 16]),
+                                                status])
                     
                     # Delete original photo
                     os.remove('.tmp/{}'.format(photo))
@@ -409,14 +383,14 @@ class Video:
 
 class GUI:
 
-    cameras = {
-            'Camera 1 - Via Fondi-Sperlonga': 'camera_1.mp4',
-            'Camera 2 - Via Appia Lato Itri': 'camera_2.mp4',
-            'Camera 3 - SR637': 'camera_3.mp4',
-            'Camera 4 - SS7': 'camera_4.mp4',
-    }
-
     def __init__(self):
+
+        # Prepare camera for selection in GUI
+        self.cameras = dict()
+        cam_number = 0
+        for camera in CAMERA_SETTINGS:
+            cam_number += 1
+            self.cameras.setdefault('Camera {} - {}'.format(cam_number, CAMERA_SETTINGS[camera]["Title"]), 'camera_{}.mp4'.format(cam_number))
 
         # Prepare the object recognition system (YOLOv4)
         self.net = cv2.dnn.readNet('yolo/yolov4.weights', 'yolo/yolov4.cfg')
@@ -429,10 +403,19 @@ class GUI:
         for ticket in os.listdir('detections')[:]:
             os.remove('detections/{}'.format(ticket))
 
+        # Delete existing CSV file (if present)
+        try: os.remove('detections/data.csv')
+        except FileNotFoundError: pass
+
         # Set window propriety
         self.root = tk.Tk()
-        self.root.title('Smart Traffic')
+        self.root.title('[DEMO] SmarTraffic')
         self.root.resizable(False, False)
+
+        # Set font style for GUI
+        lato14 = tkFont.Font(family='Lato', size=14)
+        lato13 = tkFont.Font(family='Lato', size=13)
+        lato11 = tkFont.Font(family='Lato', size=11)
 
         # Show logo
         logo = tk.Canvas(self.root, width=445, height=120)
@@ -440,45 +423,70 @@ class GUI:
         logo_img = tk.PhotoImage(file='img/logo.png')
         logo.create_image(0, 0, anchor='nw', image=logo_img)
 
-        lbl = tk.Label(self.root, font='Lato', text='Benvenuto in SmarTraffic.\nSeleziona una delle telecamere presenti dal menù in basso\ne premi Play.', padx=20, pady=10).grid(columnspan=2, row=1)
- 
+        # Welcome message
+        welcome_msg = tk.Label(self.root, font=lato14, text='Welcome to SmarTraffic!\nThis demo is a way to show how this program\nwork and the way it can be used for.').grid(padx=20, pady=10, row=1, columnspan=2)
+
+        # Tutorial button
+        guide_btn = tk.Button(self.root, font=lato14, text='Giudelines', command=lambda: GUI.guidelines(self))
+        guide_btn.config(font=lato13)
+        guide_btn.grid(row=2, columnspan=2, pady=10)
+
         # Initialise and show dropdown menù
         sources = [video for video in self.cameras.keys()]
 
         variable = tk.StringVar(self.root)
         variable.set(sources[0])
-        dropdown_menu = tk.OptionMenu(self.root, variable, *sources).grid(row=2, padx=10, sticky='w')
+        dropdown_menu = tk.OptionMenu(self.root, variable, *sources)
+        dropdown_menu.config(font=lato14)
+        
+        other_options = self.root.nametowidget(dropdown_menu.menuname)
+        other_options.config(font=lato11)
 
+        dropdown_menu.grid(row=3, column=0, padx=10, pady=15, sticky='ew')
+
+        # Show detection point
         dp = tk.IntVar()
-        box = tk.Checkbutton(self.root, text='Mostra punti di rilevamento', variable=dp).grid(row=3, padx=10, sticky='w')
+        dp.set(1)
+        box = tk.Checkbutton(self.root, font=lato13, text='Show detection point', variable=dp).grid(row=4, column=0, padx=10, sticky='w')
 
+        # Show live statistics
         sts = tk.IntVar()
-        box = tk.Checkbutton(self.root, text='Mostra statistiche live', variable=sts).grid(row=4, padx=10, sticky='w')
+        sts.set(1)
+        box = tk.Checkbutton(self.root, font=lato13, text='Show live statistics', variable=sts).grid(row=5, column=0, padx=10, sticky='w')
 
-        self.play_btn = tk.Button(self.root, text='Play', command=lambda: GUI.play_update(self, variable, dp, sts)).grid(row=5, pady=10)
+        # Save ticket
+        tkt = tk.IntVar()
+        box = tk.Checkbutton(self.root, font=lato13, text='Save tickets', variable=tkt).grid(row=6, column=0, padx=10, sticky='w')
+
+        # Export data as CSV file
+        csv_file = tk.IntVar()
+        box = tk.Checkbutton(self.root, font=lato13, text='Export data as CSV file', variable=csv_file).grid(row=7, column=0, padx=10, sticky='w')
+        
+        # Play button
+        self.play_btn = tk.Button(self.root, text='Play', command=lambda: GUI.graphic_update(self, variable, dp, sts, tkt, csv_file)).grid(row=8, pady=10, columnspan=2)
 
         # Start main loop (GUI)
         self.root.mainloop()
     
-    def play_update(self, variable, dp, sts):
+    def graphic_update(self, variable, dp, sts, tkt, csv_file):
 
         # Start video detection
-        self.play_btn = tk.Button(self.root, text='Play', state='disabled').grid(row=5, pady=10)
+        self.play_btn = tk.Button(self.root, text='Play', state='disabled').grid(row=8, pady=10, columnspan=2)
         self.root.update()
 
         # GUI.checking_ticket(self, variable.get())
-        GUI.run(self, 'video/{}'.format(self.cameras[variable.get()]), dp.get(), sts.get())
+        GUI.run(self, 'video/{}'.format(self.cameras[variable.get()]), dp.get(), sts.get(), tkt.get(), csv_file.get())
         
-        self.play_btn = tk.Button(self.root, text='Play', command=lambda: GUI.play_update(self, variable, dp, sts)).grid(row=5, pady=10)
+        self.play_btn = tk.Button(self.root, text='Play', command=lambda: GUI.graphic_update(self, variable, dp, sts, tkt, csv_file)).grid(row=8, pady=10, columnspan=2)
         self.root.update()
 
-    def run(self, source, dp, sts):
+    def run(self, source, dp, sts, ticket, CSV):
 
         video = Video(self.net, self.classes, source, dp, sts)
 
         # Initialize process
         play = multiprocessing.Process(target=video.play)
-        detect = multiprocessing.Process(target=video.detector)
+        detect = multiprocessing.Process(target=video.detector, args=[ticket, CSV])
 
         # Starting multiprocessing procedure
         play.start()
@@ -487,6 +495,8 @@ class GUI:
         while True:
             if play.exitcode == 0:
                 if not len(os.listdir('.tmp')):
+                    # TODO 
+                    # Optimize timeout
                     # GUI.checking_ticket(self)
                     os.kill(detect.pid, 9)
                     break
@@ -494,17 +504,12 @@ class GUI:
 
     def checking_ticket(self):
 
-        print(os.listdir('detections'))
+        print('There are {} tickets in detections folder'.format(len(os.listdir('detections'))))
 
-            # Waiting time
-            # time.sleep(CAMERA_SETTINGS[self.cameras[variable][: len(self.cameras[variable]) - 4]]["Timeout"])
+        # Waiting time
+        # time.sleep(CAMERA_SETTINGS[self.cameras[variable][: len(self.cameras[variable]) - 4]]["Timeout"])
 
 if __name__ == '__main__':
     
+    # Start app
     GUI()
-
-    # run('video/camera_1.mp4', 0, 0)
-
-    # def Openfolder(x):
-    #     print(x)
-    #     webbrowser.open('analysed')

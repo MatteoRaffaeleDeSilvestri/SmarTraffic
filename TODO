@@ -1,8 +1,12 @@
 
 ☐ MAKE THE CODE RUNNABLE DIRECTLY FROM THE TERMINAL IF THE GUI DOESN'T WORK!
+☐ Make S of logo look smoother
+
+☐ Sign the program
+
+☐ Add detection point side lines
 
 ☐ Comment GUI class
-☐ In GUI class make the cameras dict as a list of string and work with string object
 ☐ Resume on the gui after see a video (or a part of it)
 ☐ Make CSV downloadable - both CSV file and tickets
 ☐ Prepara la presentazione ed il file README
@@ -22,13 +26,14 @@
 
 - Uso di telecamere a 180° per lettura a doppia corsia più accurata
 - Maggiore supporto hardware (tecnologie cloud)
-- Sistama di lettura ad indirizzi IP invece del canonico circuito chiuso
+- Sistema di lettura ad indirizzi IP invece del canonico circuito chiuso
 - Database per l'analisi e la lettura dei dati nel lungo periodo
 - Agevolare l'inserimento di nuove videocamere tramite il documento CAMERA_SETTINGS
 
 ☐ GENERAL CODE REVIEW
 
 Archive:
+  ✔ In GUI class make the cameras dict as a list of string and work with string object @done(21-05-17 17:55)
   ✘ Make a GUI with Eel @cancelled(21-05-17 11:57)
   ✔ Passa il carico di yolov4cfg, yolov4.weights e coco.names nell'apertura dell'app (GUI), non all'avvio di ogni video @done(21-05-17 11:57)
   ✘ Usa bootstrap per la GUI @cancelled(21-05-17 11:57)
