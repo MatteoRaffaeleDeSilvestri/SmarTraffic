@@ -1,18 +1,14 @@
-
-☐ MAKE THE CODE RUNNABLE DIRECTLY FROM THE TERMINAL IF THE GUI DOESN'T WORK!
-☐ Make S of logo look smoother
-
+☐ Sistema directory label
+☐ Complete logo design
 ☐ Sign the program
-
+☐ Rivedi tutti i 'self.' e le assegnazioni delle variabili nella calsse GUI
 ☐ Add detection point side lines
-
-☐ Comment GUI class
-☐ Resume on the gui after see a video (or a part of it)
-☐ Make CSV downloadable - both CSV file and tickets
 ☐ Prepara la presentazione ed il file README
 
 - Visione notturna 
+- Stabilizzare FPS
 - Cambio/invasione di corsia
+- Ottimizzazione timeout camera (diversificazione basata sui dati del traffico: es. giorno/notte - adesso si basa sul rapporto auto/minuto)
 - Sorpassi
 - Controllo elettronico della velocità
 - Velocità ideale per la marcia
@@ -24,15 +20,22 @@
 - Stima dinamica dei timeout dei processi in background basato su dati pregressi (es. lavora forte nei giorin d'estate e quasi nulla nelle notti invernali)
 - Uso di "pesi" allenati ad-hoc (yolo4.weights) per questo genere di letture
 
-- Uso di telecamere a 180° per lettura a doppia corsia più accurata
+- Uso di telecamere in alta definizione con campo visiovo di 180° per lettura frontale a doppia corsia più accurata
 - Maggiore supporto hardware (tecnologie cloud)
-- Sistema di lettura ad indirizzi IP invece del canonico circuito chiuso
+- Sistema di collegamento IP invece del canonico circuito chiuso
 - Database per l'analisi e la lettura dei dati nel lungo periodo
-- Agevolare l'inserimento di nuove videocamere tramite il documento CAMERA_SETTINGS
+- Agevolare l'inserimento di nuove videocamere nel documento CAMERA_SETTINGS
 
 ☐ GENERAL CODE REVIEW
 
+☐ Add link to real documentation on github for GUI button
+
 Archive:
+  ✔ Make S of logo look smoother @done(21-05-18 22:53)
+  ✘ MAKE THE CODE RUNNABLE DIRECTLY FROM THE TERMINAL IF THE GUI DOESN'T WORK! @cancelled(21-05-18 22:17)
+  ✔ Comment GUI class @done(21-05-18 22:17)
+  ✘ Resume on the gui after see a video (or a part of it) @cancelled(21-05-18 22:17)
+  ✘ Make CSV downloadable - both CSV file and tickets @cancelled(21-05-18 22:17)
   ✔ In GUI class make the cameras dict as a list of string and work with string object @done(21-05-17 17:55)
   ✘ Make a GUI with Eel @cancelled(21-05-17 11:57)
   ✔ Passa il carico di yolov4cfg, yolov4.weights e coco.names nell'apertura dell'app (GUI), non all'avvio di ogni video @done(21-05-17 11:57)
