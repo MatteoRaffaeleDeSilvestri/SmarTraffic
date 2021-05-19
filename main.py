@@ -9,9 +9,10 @@ import multiprocessing
 from tkinter import ttk
 from copy import deepcopy
 from time import time, sleep
+from tkinter import filedialog
+from tkinter import messagebox
 from calendar import monthrange
 from tkinter import font as tkFont
-from tkinter import filedialog
 
 # Import camera settings
 with open('CAMERA_SETTINGS.json', 'r') as f:
@@ -193,9 +194,12 @@ class Video:
 
         # Prepare CSV as database
         if CSV:
-            with open('data.csv', 'w') as data:
+            with open('{}/data.csv'.format(CSV_folder), 'w') as data:
                 data_input = csv.writer(data, delimiter=',')
                 data_input.writerow(['VEHICLE_ID', 'AREA', 'DETECTION', 'CONFIDENCE', 'DIRECTION', 'DATE', 'TIME', 'STATUS'])
+        
+        # Ticket counter
+        ticket_counter = 0
 
         while True:
 
@@ -324,12 +328,13 @@ class Video:
                                                             photo[photo.index('_') + 14 : photo.index('_') + 16]), (361, 244), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 1)
                         cv2.putText(ticket, '{}'.format(status), (370, 286), cv2.FONT_HERSHEY_SIMPLEX, 0.8, status_color, 2)
 
-                        # Save the ticket
-                        cv2.imwrite('detections/ticket_{}.png'.format(len(os.listdir('detections')) + 1), ticket)
+                        # Update ticket counter and save ticket
+                        ticket_counter += 1
+                        cv2.imwrite('{}/ticket_{}.png'.format(tkt_folder.split(' ')[0], ticket_counter), ticket)
 
                     # Add record to CSV database
                     if CSV:
-                        with open('data.csv', 'a') as data:
+                        with open('{}/data.csv'.format(CSV_folder), 'a') as data:
                             data_input = csv.writer(data, delimiter=',')
                             data_input.writerow([photo[ : photo.index('_')],
                                                 CAMERA_SETTINGS[self.camera[6 : len(self.camera) - 4]]["Title"],
@@ -400,14 +405,6 @@ class GUI:
         with open('yolo/coco.names', 'r') as f:
             self.classes = f.read().splitlines()
 
-        # Delete existing ticket (if present)
-        for ticket in os.listdir('detections')[:]:
-            os.remove('detections/{}'.format(ticket))
-
-        # Delete existing CSV file (if present)
-        try: os.remove('detections/data.csv')
-        except FileNotFoundError: pass
-        
         # Set window propriety
         self.root = tk.Tk()
         self.root.title('[DEMO] SmarTraffic')
@@ -450,12 +447,12 @@ class GUI:
 
         # Show detection point
         dp = tk.IntVar()
-        dp.set(1)
+        dp.set(0)
         tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Show detection point', variable=dp, width=28).grid(row=4, column=1, padx=25, sticky='ew')
 
         # Show live statistics
         sts = tk.IntVar()
-        sts.set(1)
+        sts.set(0)
         tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Show live statistics', variable=sts, width=28).grid(row=5, column=1, padx=25, sticky='ew')
 
         # Horizontal separator
@@ -471,7 +468,7 @@ class GUI:
         
         tk.Button(self.root, font=self.lato13, fg='#242424', text='Choose a destination folder', command=lambda: GUI.dest_directory(self, 0), width=28, state='disabled').grid(row=9, column=0, padx=30, pady=10, sticky='ew')
 
-        self.tkt_folder = tk.Label(self.root, font=self.lato12italic, fg='#a0a0a0', text='Current folder:\n/SmarTraffic/detections [default]',  width=40)
+        self.tkt_folder = tk.Label(self.root, font=self.lato12italic, fg='#a0a0a0', text='Current folder:\n - ',  width=40)
         self.tkt_folder.grid(row=10, column=0, padx=25, sticky='ew')
 
         # Export data as CSV file
@@ -481,7 +478,7 @@ class GUI:
 
         tk.Button(self.root, font=self.lato13, fg='#242424', text='Choose a destination folder', command=lambda: GUI.dest_directory(self, 1), width=28, state='disabled').grid(row=9, column=1, padx=30, pady=10, sticky='ew')
         
-        self.csv_folder = tk.Label(self.root, font=self.lato12italic, fg='#a0a0a0', text='Current folder:\n/SmarTraffic [default]', width=40)
+        self.csv_folder = tk.Label(self.root, font=self.lato12italic, fg='#a0a0a0', text='Current folder:\n - ', width=40)
         self.csv_folder.grid(row=10, column=1, padx=25, sticky='ew')
         
         # Horizontal separator
@@ -498,13 +495,14 @@ class GUI:
 
         # Tutorial button
         tk.Label(self.root, font=lato12, fg='#242424', text='Need some help?').grid(row=15, column=0, columnspan=2)
-        tk.Button(self.root, font=self.lato12italic, fg='#242424', text='Check out the documentation', command=lambda: webbrowser.open('https://www.google.com/webhp?hl=it&sa=X&ved=0ahUKEwib5s75hdTwAhUIzaQKHdvNCeEQPAgI')).grid(row=16, column=0, columnspan=2, padx=10, pady=5)
+        tk.Button(self.root, font=self.lato12italic, fg='#242424', text='Check out the documentation', command=lambda: webbrowser.open('https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic', new=0, autoraise=True)).grid(row=16, column=0, columnspan=2, padx=10, pady=5)
 
         # Start main loop (GUI)
         self.root.mainloop()
     
     def update_folder(self, var, col):
 
+        # Update the button after selecting/deselecting the associated option
         new_btn = tk.Button(self.root, font=self.lato13, fg='#242424', text='Choose a destination folder', command=lambda: GUI.dest_directory(self, col))
         
         if var.get():
@@ -517,35 +515,93 @@ class GUI:
         new_btn.grid(row=9, column=col, padx=30, pady=10, sticky='ew')
 
         if col:
-            self.csv_folder = tk.Label(self.root, font=self.lato12italic, fg=color, text='Current folder:\n/SmarTraffic [default]', width=40)
+            self.csv_folder = tk.Label(self.root, font=self.lato12italic, fg=color, text='Current folder:\n - ', width=40)
             self.csv_folder.grid(row=10, column=col, padx=25, sticky='ew')
         else:
-            self.tkt_folder = tk.Label(self.root, font=self.lato12italic, fg=color, text='Current folder:\n/SmarTraffic/detections [default]', width=40)
+            self.tkt_folder = tk.Label(self.root, font=self.lato12italic, fg=color, text='Current folder:\n - ', width=40)
             self.tkt_folder.grid(row=10, column=col, padx=25, sticky='ew')
+        
+        # Call directory choice function automatically
+        if color == '#242424':
+            GUI.dest_directory(self, col)
 
     def dest_directory(self, col):
 
-        folder = filedialog.askdirectory(mustexist=True)
+        # Reset previous folder choice
+        if col:
+            self.csv_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n - ', width=40)
+            self.csv_folder.grid(row=10, column=col, padx=25, sticky='ew')
+        else:
+            self.tkt_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n - ', width=40)
+            self.tkt_folder.grid(row=10, column=col, padx=25, sticky='ew')
 
-        try:
+        # Choose the destination folder for the generated file
+        folder = filedialog.askdirectory(mustexist=True)
+        
+        if type(folder) == str and os.path.isdir(str(folder)):
             if col:
                 self.csv_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n{}'.format(folder), width=40)
                 self.csv_folder.grid(row=10, column=col, padx=25, sticky='ew')
             else:
                 self.tkt_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n{}'.format(folder), width=40)
                 self.tkt_folder.grid(row=10, column=col, padx=25, sticky='ew')
-        except AttributeError:
-            pass
-        
+        else:
+
+            # Ask what to do to the user
+            warning = messagebox.askquestion('Invalid folder', 'The selected folder is not valid!\n\nIf you want to save the file you need to select a folder.\nDo you want to save the file?')
+            if warning == 'yes':
+                
+                # Repeat the folder selection procedure
+                GUI.dest_directory(self, col)
+                
+            else:
+
+                # "Reset" the folder
+                if col:
+                    self.csv_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n - ', width=40)
+                    self.csv_folder.grid(row=10, column=col, padx=25, sticky='ew')
+                else:
+                    self.tkt_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n - ', width=40)
+                    self.tkt_folder.grid(row=10, column=col, padx=25, sticky='ew')
+
     def play_update(self, variable, dp, sts, tkt, tkt_folder, csv_file, csv_file_folder):
-
-        # Start video detection
-        tk.Button(self.root, font=self.lato13, fg='#242424', text='Playing', command=lambda: GUI.graphic_update(self, variable, dp, sts, tkt, csv_file), width=8, state='disabled').grid(row=13, column=0, columnspan=2)
-        self.root.update()
-
-        GUI.run(self, 'video/{}'.format(self.cameras[variable.get()]), dp.get(), sts.get(), tkt.get(), tkt_folder[csv_file_folder.index(':') + 2: ], csv_file.get(), csv_file_folder[csv_file_folder.index(':') + 2: ])
         
-        tk.Button(self.root, font=self.lato13, fg='#242424', text='Play', command=lambda: GUI.graphic_update(self, variable, dp, sts, tkt, csv_file),  width=8, state='normal').grid(row=13, column=0, columnspan=2)
+        # Check ticket and CSV folder anomalies
+        if tkt.get() and not os.path.isdir('/{}'.format(tkt_folder[tkt_folder.index(':') + 3 : ])):
+            
+            # Update ticket section (GUI)
+            tkt = tk.IntVar()
+            tkt.set(0)
+            tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Save tickets', variable=tkt, command=lambda: GUI.update_folder(self, tkt, 0)).grid(row=8, column=0, padx=25, sticky='ew')
+            GUI.update_folder(self, tkt, 0)
+
+            # Notify the error to the user
+            tkt_answare = messagebox.askyesno('Invalid folder', 'No folder selected.\nTickets will not be saved.\nDo you want to continue?')
+            if not tkt_answare:
+                return
+
+        if csv_file.get() and not os.path.isdir('/{}'.format(csv_file_folder[csv_file_folder.index(':') + 3 : ])):
+        
+            # Update CSV section (GUI)
+            csv_file = tk.IntVar()
+            csv_file.set(0)
+            tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Export data as CSV file', variable=csv_file, command=lambda: GUI.update_folder(self, csv_file, 1)).grid(row=8, column=1, padx=25, sticky='ew')
+            GUI.update_folder(self, csv_file, 1)
+
+            # Notify the error to the user
+            csv_answare = messagebox.askyesno('Invalid folder', 'No folder selected.\nCSV file will not be saved.\nDo you want to continue?')
+            if not csv_answare:
+                return
+
+        # "Lock" play button
+        tk.Button(self.root, font=self.lato13, fg='#242424', text='Playing', width=8, state='disabled').grid(row=13, column=0, columnspan=2)
+        self.root.update()
+        
+        # Run the program
+        GUI.run(self, 'video/{}'.format(self.cameras[variable.get()]), dp.get(), sts.get(), tkt.get(), '/{}'.format(tkt_folder[tkt_folder.index(':') + 3 : ]), csv_file.get(), '/{}'.format(csv_file_folder[csv_file_folder.index(':') + 3 : ]))
+        
+        # "Unlock" play button
+        tk.Button(self.root, font=self.lato13, fg='#242424', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, self.tkt_folder['text'], csv_file, self.csv_folder['text']),  width=8, state='normal').grid(row=13, column=0, columnspan=2)
         self.root.update()
 
     def run(self, source, dp, sts, ticket, ticket_folder, CSV, CSV_folder):
@@ -565,8 +621,6 @@ class GUI:
             if play.exitcode == 0:
                 timeout = 0.1
                 if not len(os.listdir('.tmp')):
-                    # TODO 
-                    # Optimize timeout
                     os.kill(detect.pid, 9)
                     break
             sleep(timeout)
