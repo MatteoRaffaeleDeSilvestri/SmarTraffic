@@ -1,8 +1,5 @@
-☐ Sistema scelta cartella
-
 ☐ Controlla grammatica commenti
 
-☐ Sign the program
 ☐ Prepara la presentazione ed il file README
 ☐ Add a resume window after palying a video that show vehicle detected (ticket generated) and something else
 ☐ Timeout modified: test it!
@@ -32,6 +29,9 @@
 ☐ GENERALE TEST FOR ALL CAMERAS
 
 Archive:
+  ✔ Make GUI a bit more stylish @started(21-05-19 20:30) @done(21-05-19 20:43) @lasted(13m36s)
+  ✔ Sistema scelta cartella @done(21-05-19 19:44)
+  ✔ Sign the program @started(21-05-19 19:36) @done(21-05-19 19:43) @lasted(7m10s)
   ✘ Complete logo design (Desktop) @cancelled(21-05-19 19:07)
   ✘ Add detection point side lines @cancelled(21-05-19 13:26)
   ✔ Check TODO in main file @done(21-05-19 13:27)

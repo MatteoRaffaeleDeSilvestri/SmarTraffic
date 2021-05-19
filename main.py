@@ -416,6 +416,7 @@ class GUI:
         self.lato12italic = tkFont.Font(family='Lato', size=12, slant='italic')
         lato12 = tkFont.Font(family='Lato', size=12)
         lato11 = tkFont.Font(family='Lato', size=11)
+        lato10italic = tkFont.Font(family='Lato', size=10, slant='italic')
         
         # Show logo
         logo = tk.Canvas(self.root, width=445, height=120)
@@ -488,14 +489,17 @@ class GUI:
         tk.Label(self.root, font=lato12, fg='#242424', text='STEP 3\nPress \"Play\" and see how the program work.').grid(row=12, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
 
         # Play button
-        tk.Button(self.root, font=self.lato13, fg='#242424', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, self.tkt_folder['text'], csv_file, self.csv_folder['text']), width=8, state='normal').grid(row=13, column=0, columnspan=2, pady=10,)
+        tk.Button(self.root, font=self.lato13, bg='#53c918', fg='#242424', activebackground='#80ff40', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, self.tkt_folder['text'], csv_file, self.csv_folder['text']), width=8, state='normal').grid(row=13, column=0, columnspan=2, pady=10,)
 
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=14, column=0, columnspan=2, padx=10, pady=10, sticky='ew')
 
         # Tutorial button
         tk.Label(self.root, font=lato12, fg='#242424', text='Need some help?').grid(row=15, column=0, columnspan=2)
-        tk.Button(self.root, font=self.lato12italic, fg='#242424', text='Check out the documentation', command=lambda: webbrowser.open('https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic', new=0, autoraise=True)).grid(row=16, column=0, columnspan=2, padx=10, pady=5)
+        tk.Button(self.root, font=self.lato12italic, fg='#242424', activeforeground='#001263', text='Check out the documentation', command=lambda: webbrowser.open('https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic', new=0, autoraise=True)).grid(row=16, column=0, columnspan=2, padx=10, pady=5)
+
+        # Sign 
+        tk.Label(self.root, font=lato10italic, fg='#a0a0a0', text='MatteoRaffaeleDeSilvestri').grid(row=17, column=0, columnspan=2, sticky='ew')
 
         # Start main loop (GUI)
         self.root.mainloop()
@@ -594,14 +598,14 @@ class GUI:
                 return
 
         # "Lock" play button
-        tk.Button(self.root, font=self.lato13, fg='#242424', text='Playing', width=8, state='disabled').grid(row=13, column=0, columnspan=2)
+        tk.Button(self.root, font=self.lato13, bg='#b3fc8d', fg='#242424', text='Playing', width=8, state='disabled').grid(row=13, column=0, columnspan=2)
         self.root.update()
         
         # Run the program
         GUI.run(self, 'video/{}'.format(self.cameras[variable.get()]), dp.get(), sts.get(), tkt.get(), '/{}'.format(tkt_folder[tkt_folder.index(':') + 3 : ]), csv_file.get(), '/{}'.format(csv_file_folder[csv_file_folder.index(':') + 3 : ]))
         
         # "Unlock" play button
-        tk.Button(self.root, font=self.lato13, fg='#242424', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, self.tkt_folder['text'], csv_file, self.csv_folder['text']),  width=8, state='normal').grid(row=13, column=0, columnspan=2)
+        tk.Button(self.root, font=self.lato13, bg='#53c918', fg='#242424', activebackground='#80ff40', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, self.tkt_folder['text'], csv_file, self.csv_folder['text']),  width=8, state='normal').grid(row=13, column=0, columnspan=2)
         self.root.update()
 
     def run(self, source, dp, sts, ticket, ticket_folder, CSV, CSV_folder):
