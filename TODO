@@ -1,9 +1,11 @@
-☐ Sistema directory label
 ☐ Complete logo design
 ☐ Sign the program
 ☐ Rivedi tutti i 'self.' e le assegnazioni delle variabili nella calsse GUI
 ☐ Add detection point side lines
 ☐ Prepara la presentazione ed il file README
+☐ Rivedi ancora i timeout
+☐ Check TODO in main file
+☐ Change vGen folder name (repository and driectory to submit) to SmarTraffic for consistency 
 
 - Visione notturna 
 - Stabilizzare FPS
@@ -31,6 +33,8 @@
 ☐ Add link to real documentation on github for GUI button
 
 Archive:
+  ✔ Sistema directory label @done(21-05-19 10:26)
+  ✔ try to remove self.root.update @done(21-05-19 10:26)
   ✔ Make S of logo look smoother @done(21-05-18 22:53)
   ✘ MAKE THE CODE RUNNABLE DIRECTLY FROM THE TERMINAL IF THE GUI DOESN'T WORK! @cancelled(21-05-18 22:17)
   ✔ Comment GUI class @done(21-05-18 22:17)

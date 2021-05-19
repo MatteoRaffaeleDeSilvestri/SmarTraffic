@@ -1,7 +1,7 @@
 /.vscode
 /coco.names
 /media
-/vGen
+
 /detections
 __pycache__/utilities.cpython-38.pyc
 __pycache__/main.cpython-38.pyc
@@ -11,3 +11,5 @@ ticket.png
 Fonts_OpenCV.png
 img/ticket.xcf
 img/logo.xcf
+/SmarTraffic
+.gitignore
