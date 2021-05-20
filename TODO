@@ -1,8 +1,7 @@
 ☐ Controlla grammatica commenti
 
 ☐ Prepara la presentazione ed il file README @started(21-05-20 15:14)
-☐ Add a resume window after palying a video that show vehicle detected (ticket generated) and something else
-☐ Timeout modified: test it!
+☐ Add a resume window after palying a video that show vehicle detected (ticket generated) and something else @started(21-05-20 21:56)
 
 - Visione notturna 
 - Stabilizzare FPS
@@ -29,6 +28,8 @@
 ☐ GENERALE TEST FOR ALL CAMERAS
 
 Archive:
+  ✔ Timeout modified: test it! @done(21-05-20 21:56)
+  ✘ Salva dati nel CSV sole dei veicoli!!! @cancelled(21-05-20 21:52)
   ✔ Make GUI a bit more stylish @started(21-05-19 20:30) @done(21-05-19 20:43) @lasted(13m36s)
   ✔ Sistema scelta cartella @done(21-05-19 19:44)
   ✔ Sign the program @started(21-05-19 19:36) @done(21-05-19 19:43) @lasted(7m10s)

@@ -425,13 +425,13 @@ class GUI:
         logo.create_image(0, 0, anchor='nw', image=logo_img)
 
         # Welcome message
-        tk.Label(self.root, font=lato14, fg='#242424', text='Welcome to SmarTraffic!\nThis demo aims to show how the program works.\nFollow the steps below and see the result.').grid(row=1, column=0, columnspan=2, padx=20, pady=15)
+        tk.Label(self.root, font=lato14, fg='#242424', text='Welcome to SmarTraffic!\nThis demo aims to show how the program works.\nFollow the steps below and see the result').grid(row=1, column=0, columnspan=2, padx=20, pady=15)
 
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=2, column=0, columnspan=2, padx=10, sticky='ew')
 
         # Step 1
-        tk.Label(self.root, font=lato12, fg='#242424', text='STEP 1\nChoose a camera from the menù below and the information you want\nto display on the camera screen.').grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky='ew')
+        tk.Label(self.root, font=lato12, fg='#242424', text='STEP 1\nChoose a camera from the menù below and the information you want\nto display on the camera screen').grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky='ew')
 
         # Initialise and show dropdown menù
         sources = [video for video in self.cameras.keys()]
@@ -460,7 +460,7 @@ class GUI:
         ttk.Separator(self.root, orient='horizontal').grid(row=6, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
 
         # Step 2
-        tk.Label(self.root, font=lato12, fg='#242424', text='STEP 2\nChoose if to generate or not the ticket and the CSV data file.').grid(row=7, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
+        tk.Label(self.root, font=lato12, fg='#242424', text='STEP 2\nChoose if to generate or not the ticket and the CSV data file').grid(row=7, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
 
         # Save ticket
         tkt = tk.IntVar()
@@ -486,7 +486,7 @@ class GUI:
         ttk.Separator(self.root, orient='horizontal').grid(row=11, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
 
         # Step 3
-        tk.Label(self.root, font=lato12, fg='#242424', text='STEP 3\nPress \"Play\" and see how the program work.').grid(row=12, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
+        tk.Label(self.root, font=lato12, fg='#242424', text='STEP 3\nPress \"Play\" and see how the program work').grid(row=12, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
 
         # Play button
         tk.Button(self.root, font=self.lato13, bg='#53c918', fg='#242424', activebackground='#80ff40', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, self.tkt_folder['text'], csv_file, self.csv_folder['text']), width=8, state='normal').grid(row=13, column=0, columnspan=2, pady=10,)
@@ -628,6 +628,8 @@ class GUI:
                     os.kill(detect.pid, 9)
                     break
             sleep(timeout)
+        
+        messagebox.showinfo('Detection completed', 'Object detected:\n[...]')
 
 if __name__ == '__main__':
     
