@@ -2,6 +2,7 @@
 
 ☐ Prepara la presentazione ed il file README @started(21-05-20 15:14)
 ☐ Add a resume window after palying a video that show vehicle detected (ticket generated) and something else @started(21-05-20 21:56)
+☐ Notify when a danger is find on the road (es.person)
 
 - Visione notturna 
 - Stabilizzare FPS
@@ -26,6 +27,7 @@
 
 ☐ GENERAL CODE REVIEW
 ☐ GENERALE TEST FOR ALL CAMERAS
+☐ GENERAL DOCUMENT REVIEW
 
 Archive:
   ✔ Timeout modified: test it! @done(21-05-20 21:56)
