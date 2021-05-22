@@ -19,17 +19,19 @@ The goal of this internship is to give the participants an introduction to the <
 
 - <b>Python</b> as programming language;
 - <b>OpenCV</b> as reference library for computer vision tasks;
-- <b>Yolo</b> as object detection system (<i>this project use [Yolov4](readme/2004.10934.pdf)</i>).</li>
+- <b>Yolo</b> as object detection system (<i>this project use [Yolov4](resources/2004.10934.pdf "Click to see moer informations")</i>).</li>
 
 In particular, this project is mean to realise a <b>real-time traffic control system</b> that help operators to control and prevent traffic anomalies such as heavy traffic, accident, etc.
 
 ### The idea
 
-The idea this project is based on was to find a way to use <b><i>real-time detection</i></b> that was both fast to develop, easy to maintain, potentially scalable and usable in a real case scenario.</br>
+The idea this project is based on was to find a way to use <b><i>real-time detection</i></b> that was both fast to develop, easy to maintain, potentially scalable and usable in a real case scenario.
+
+I live in a small town
 
 Making some research, i realised that is a very common practice to put the result of detection directly <i>"on top"</i> of the image (<i>or frame in case of video</i>) the dectection has been done.
 
-![](readme/img1.png "Result of object detection on an image")
+![](resources/img1.png "Result of object detection on an image")
 
 Even if this practice give result that are cool to see and can be considered educational from a certain poin of view, in a real case scenario it's useless. Considering that <i><b>object recognition systems</b></i> works as emulator of human capability to see and identify objects, in a situation where there is someone watching directly at the screen there is no point to have all those colorfull things on the image. For a person is just easyer to look directly at the screen and figure out what he is looking at by themself.
 
@@ -45,7 +47,6 @@ To do so, this program automatise all the operations that normally would be perf
     <li>To draw the attention of staff to abnormal and/or potentially dangerous situations;</li>
     <li>Collect data for long-term traffic analysis and prediction.</li>
 </ul>
-
 
 ## Setup
 
