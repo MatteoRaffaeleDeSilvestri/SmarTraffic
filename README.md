@@ -33,11 +33,13 @@ Fondi has four main access roads from the nearby towns:
 
 ![](resources/map.png "Main road access to Fondi")
 
-That amount of traffic for each road depend on different factor, for example Via Fondi-Sperlonga is heavly trafficated in summer because is the main road that conduct to the sea, SS7 and SR637 are more used in some days of the week instead of others for commerce with other town  (we have the second biggest fruit and vegetable market of Europe). 
+That amount of traffic for each road depend on different factors, for example Via Fondi-Sperlonga is heavly trafficated in summer because is the main road that conduct to the sea, while SS7 and SR637 are more used in some days of the week instead of others for commerce purpouses (we have the second biggest fruit and vegetable market of Europe).
 
-Making some research, i realised that is a very common practice to put the result of detection directly <i>"on top"</i> of the image (<i>or frame in case of video</i>) the dectection has been done.
+Traffic in town can be more or less heavy depending on the amount of entering and leaving vehicles, and because there are more way to enter and leave the town, i decided to base my system on four different cameras (one for each road).    
 
-![](resources/img1.png "Result of object detection on an image")
+Making some research about the existing technologies to accomplish this task, i realised that is a very common practice to put the result of detection directly <i>"on top"</i> of the image (or <i>frame</i> in case of video) the detection has been done.
+
+![](resources/detection.png "Result of object detection on an image")
 
 Even if this practice give result that are cool to see and can be considered educational from a certain poin of view, in a real case scenario it's useless. Considering that <i><b>object recognition systems</b></i> works as emulator of human capability to see and identify objects, in a situation where there is someone watching directly at the screen there is no point to have all those colorfull things on the image. For a person is just easyer to look directly at the screen and figure out what he is looking at by themself.
 
@@ -50,14 +52,14 @@ To do so, this program automatise all the operations that normally would be perf
     <li>Calculate the quantity and direction of vehicles in transit;</li>
     <li>Estimate city traffic conditions level based on the quantity and type of vehicles entering and leaving it;</li>
     <li>For each vehicle in transit identify data such as the <i>route on which it transits</i>, <i>type</i> (>49%), <i>direction</i> (entering or leaving the town), <i>date</i> and <i>time</i> of transit, etc;</li>
-    <li>To draw the attention of staff to abnormal and/or potentially dangerous situations;</li>
+    <li>Recall staff attention to abnormal and/or potentially dangerous situations;</li>
     <li>Collect data for long-term traffic analysis and prediction.</li>
 </ul>
 
 ## Setup
 
 The program has been written in <b><i>Python 3.8.5</i></b>.</br>
-In addition, the following library are required:
+In addition, the following libraries are required:
 
 <ul>
     <li><b>OpenCV</b> (version: <i>4.5.1.48</i>);</li>
