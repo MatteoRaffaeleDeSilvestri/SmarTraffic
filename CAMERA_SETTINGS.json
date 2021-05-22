@@ -12,7 +12,7 @@
     },
 
     "camera_2" : {
-        "Title" : "Via Appia Lato Itri",
+        "Title" : "SS7 - Via Appia Lato Itri",
         "BackgroundSubtractor" : [50, 100],
         "ROI_SX" : [200, 700, 280, 580],
         "ROI_DX" : [200, 700, 480, 780],
@@ -24,7 +24,7 @@
     },
 
     "camera_3" : {
-        "Title" : "SR 637 (Frosinone - Gaeta)",
+        "Title" : "SR637 (Frosinone - Gaeta)",
         "BackgroundSubtractor" : [100, 50],
         "ROI_SX" : [200, 700, 250, 550],
         "ROI_DX" : [200, 700, 550, 850],
@@ -36,7 +36,7 @@
     },
     
     "camera_4" : {
-        "Title" : "Via Appia Lato Roma",
+        "Title" : "SS7 - Via Appia Lato Roma",
         "BackgroundSubtractor" : [100, 20],
         "ROI_SX" : [200, 700, 250, 550],
         "ROI_DX" : [200, 700, 500, 800],
