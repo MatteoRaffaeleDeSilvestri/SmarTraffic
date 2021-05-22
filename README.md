@@ -27,7 +27,13 @@ In particular, this project is mean to realise a <b>real-time traffic control sy
 
 The idea this project is based on was to find a way to use <b><i>real-time detection</i></b> that was both fast to develop, easy to maintain, potentially scalable and usable in a real case scenario.
 
-I live in a small town
+I live in Fondi, a town in province of Latin (Italy). Even if this town is not so big, it's full of life and this implies that our roads are often full of traffic. So i decided to base my project on it.
+
+Fondi has four main access roads from the nearby towns:
+
+![](resources/map.png "Main road access to Fondi")
+
+That amount of traffic for each road depend on different factor, for example Via Fondi-Sperlonga is heavly trafficated in summer because is the main road that conduct to the sea, SS7 and SR637 are more used in some days of the week instead of others for commerce with other town  (we have the second biggest fruit and vegetable market of Europe). 
 
 Making some research, i realised that is a very common practice to put the result of detection directly <i>"on top"</i> of the image (<i>or frame in case of video</i>) the dectection has been done.
 
