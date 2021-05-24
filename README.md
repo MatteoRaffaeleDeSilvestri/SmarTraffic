@@ -19,7 +19,7 @@ The goal of this internship is to give the participants an introduction to the <
 
 - <b>Python</b> as programming language;
 - <b>OpenCV</b> as reference library for computer vision tasks;
-- <b>Yolo</b> as object detection system (<i>this project use [Yolov4](resources/2004.10934.pdf "Click to see moer informations")</i>).</li>
+- <b>Yolo</b> as object detection system (<i>this project use YoloV4</i>).</li>
 
 In particular, this project is mean to realise a <b>real-time traffic control system</b> that help operators to control and prevent traffic anomalies such as heavy traffic, accident, etc.
 
@@ -51,7 +51,7 @@ To do so, this program automatise all the operations that normally would be perf
     <li>Traffic visualization in real time (<i>trough live cameras</i>);</li>
     <li>Calculate the quantity and direction of vehicles in transit;</li>
     <li>Estimate city traffic conditions level based on the quantity and type of vehicles entering and leaving it;</li>
-    <li>For each vehicle in transit identify data such as the <i>route on which it transits</i>, <i>type</i> (>49%), <i>direction</i> (entering or leaving the town), <i>date</i> and <i>time</i> of transit, etc;</li>
+    <li>For each vehicle in transit identify data such as the <i>route on which it transits</i>, <i>type</i>, <i>direction</i> (entering or leaving the town), <i>date</i> and <i>time</i> of transit, etc;</li>
     <li>Recall staff attention to abnormal and/or potentially dangerous situations;</li>
     <li>Collect data for long-term traffic analysis and prediction.</li>
 </ul>
