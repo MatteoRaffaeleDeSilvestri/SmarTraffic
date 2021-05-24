@@ -14,10 +14,6 @@ from tkinter import messagebox
 from calendar import monthrange
 from tkinter import font as tkFont
 
-# Import camera settings
-with open('CAMERA_SETTINGS.json', 'r') as f:
-    CAMERA_SETTINGS = json.load(f)
-
 class Video:
 
     def __init__(self, ntt, clss, source, dp, sts):
@@ -38,7 +34,7 @@ class Video:
     def play(self):
 
         # Set mini logo fro camera screen
-        logo_mini = cv2.imread('img/logo_mini.png')
+        logo_mini = cv2.imread('resources/logo_mini.png')
 
         # Take video frome source 
         source = self.camera
@@ -58,7 +54,7 @@ class Video:
         date = CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"][ : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"].index('-') - 1].split('/')
         clock = CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"][CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"].index('-') + 2 : ].split(':')
 
-        year, month, day, hh, mm, ss = Video.timer(self,  int(date[2]),  int(date[1]), int(date[0]), int(clock[0]), int(clock[1]),int(clock[2]))
+        year, month, day, hh, mm, ss = timer(int(date[2]),  int(date[1]), int(date[0]), int(clock[0]), int(clock[1]),int(clock[2]))
 
         # Object detection from camera
         object_detector = cv2.createBackgroundSubtractorMOG2(history=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][0], varThreshold=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][1])
@@ -167,7 +163,7 @@ class Video:
             update_interval += end_update - start_update
             if update_interval >= 1:
                 FPS = int(1 / round(end_update - start_update, 3))
-                year, month, day, hh, mm, ss = Video.timer(self, int(year), int(month), int(day), int(hh), int(mm), int(ss))
+                year, month, day, hh, mm, ss = timer(int(year), int(month), int(day), int(hh), int(mm), int(ss))
                 update_interval = 0
 
             # Default camera info
@@ -207,7 +203,7 @@ class Video:
             if len(os.listdir('.tmp')):
 
                 # Prepare the base for the ticket to generate
-                base = cv2.imread('img/ticket.png')
+                base = cv2.imread('resources/ticket.png')
 
                 # Make detection for each photo
                 for photo in os.listdir('.tmp')[:]:
@@ -237,7 +233,7 @@ class Video:
                             confidence = scores[class_id]
 
                             # Set the minimum level of confidence at 50%
-                            if confidence >= 0.5:
+                            if confidence > 0.5:
                         
                                 # Get object size
                                 center_x = int(detection[0] * width)
@@ -262,8 +258,8 @@ class Video:
 
                         x, y, w, h = boxes[indexes.flatten()[0]]
 
-                        obj = str(self.classes[class_ids[indexes.flatten()[0]]]) + ' - '
-                        confidence = str(round(confidences[indexes.flatten()[0]] * 100, 1)) + '%'
+                        obj = '{} - '.format(str(self.classes[class_ids[indexes.flatten()[0]]]))
+                        confidence = '{}%'.format(str(round(confidences[indexes.flatten()[0]] * 100, 1)))
                         if photo[photo.index('_') + 1] == 'C':
                             direction = 'Coming'
                         else:
@@ -272,10 +268,15 @@ class Video:
                         if obj[ : len(obj) - 3] not in self.vehicles:
                             if obj[ : len(obj) - 3] in self.other_object :
                                 status = 'ATTENTION: {} on the road'.format(obj[ : len(obj) - 3])
+                                message(0, status)
                             else:
                                 status = 'ATTENTION: object on the road'
+                                message(1, status)
+
                             status_color = (0, 43, 214)
+
                         else:
+
                             status = 'OK'
                             status_color = (0, 179, 69)
 
@@ -294,6 +295,7 @@ class Video:
                             else:
                                 direction = 'Leaving'
                             status = 'ERROR: no object detected'
+                            message(2, status)
                             status_color = (0, 179, 219)
 
                         # Multiple object detected in the photo
@@ -306,6 +308,7 @@ class Video:
                             else:
                                 direction = 'Leaving'
                             status = 'ERROR: multiple object detected'
+                            message(3, status)
                             status_color = (0, 179, 219)
 
                             for i in indexes.flatten():
@@ -352,41 +355,6 @@ class Video:
 
                 sleep(1)
 
-    def timer(self, year, month, day, h, m, s):
-
-        # Update the timer on the camera screen
-        if s < 59:
-            s += 1
-        else:
-            s = 0
-            if m < 59:
-                m += 1
-            else:
-                m = 0
-                if h < 23:
-                    h += 1
-                else:
-                    h = 0
-                    if day < monthrange(year, month)[1]:
-                        day += 1
-                    else:
-                        day = 1
-                        if month < 12:
-                            month += 1
-                        else:
-                            month = 1
-                            year += 1
-        
-        # Normalise values before returning
-        if s < 10: s = '0' + str(s)
-        if m < 10: m = '0' + str(m)
-        if h < 10: h = '0' + str(h)
-        if day < 10: day = '0' + str(day)
-        if month < 10: month = '0' + str(month)
-        if year < 10: year = '0' + str(year)
-        
-        return year, month, day, h, m, s
-
 class GUI:
 
     def __init__(self):
@@ -421,7 +389,7 @@ class GUI:
         # Show logo
         logo = tk.Canvas(self.root, width=445, height=120)
         logo.grid(row=0, column=0, columnspan=2, padx=50, pady=15)
-        logo_img = tk.PhotoImage(file='img/logo.png')
+        logo_img = tk.PhotoImage(file='resources/logo.png')
         logo.create_image(0, 0, anchor='nw', image=logo_img)
 
         # Welcome message
@@ -449,18 +417,18 @@ class GUI:
         # Show detection point
         dp = tk.IntVar()
         dp.set(0)
-        tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Show detection point', variable=dp, width=28).grid(row=4, column=1, padx=25, sticky='ew')
+        tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Show detection point', variable=dp, width=28).grid(row=4, column=1, padx=25, sticky='w')
 
         # Show live statistics
         sts = tk.IntVar()
         sts.set(0)
-        tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Show live statistics', variable=sts, width=28).grid(row=5, column=1, padx=25, sticky='ew')
+        tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Show live statistics   ', variable=sts, width=28).grid(row=5, column=1, padx=21, sticky='w')
 
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=6, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
 
         # Step 2
-        tk.Label(self.root, font=lato12, fg='#242424', text='STEP 2\nChoose if to generate or not the ticket and the CSV data file').grid(row=7, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
+        tk.Label(self.root, font=lato12, fg='#242424', text='STEP 2\nChoose if to generate or not the tickets and the CSV data file').grid(row=7, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
 
         # Save ticket
         tkt = tk.IntVar()
@@ -499,7 +467,7 @@ class GUI:
         tk.Button(self.root, font=self.lato12italic, fg='#242424', activeforeground='#001263', text='Check out the documentation', command=lambda: webbrowser.open('https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic', new=0, autoraise=True)).grid(row=16, column=0, columnspan=2, padx=10, pady=5)
 
         # Sign 
-        tk.Label(self.root, font=lato10italic, fg='#a0a0a0', text='MatteoRaffaeleDeSilvestri').grid(row=17, column=0, columnspan=2, sticky='ew')
+        tk.Label(self.root, font=lato10italic, fg='#a0a0a0', text='MatteoRaffaeleDeSilvestri').grid(row=17, column=0, columnspan=2, sticky='e')
 
         # Start main loop (GUI)
         self.root.mainloop()
@@ -572,30 +540,30 @@ class GUI:
         
         # Check ticket and CSV folder anomalies
         if tkt.get() and not os.path.isdir('/{}'.format(tkt_folder[tkt_folder.index(':') + 3 : ])):
-            
+
+            # Notify the error to the user
+            tkt_answare = messagebox.askyesno('Invalid folder', 'No folder selected.\n\nTickets will not be saved.\nDo you want to continue?')
+            if not tkt_answare:
+                return
+
             # Update ticket section (GUI)
             tkt = tk.IntVar()
             tkt.set(0)
             tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Save tickets', variable=tkt, command=lambda: GUI.update_folder(self, tkt, 0)).grid(row=8, column=0, padx=25, sticky='ew')
             GUI.update_folder(self, tkt, 0)
 
-            # Notify the error to the user
-            tkt_answare = messagebox.askyesno('Invalid folder', 'No folder selected.\nTickets will not be saved.\nDo you want to continue?')
-            if not tkt_answare:
-                return
-
         if csv_file.get() and not os.path.isdir('/{}'.format(csv_file_folder[csv_file_folder.index(':') + 3 : ])):
         
+            # Notify the error to the user
+            csv_answare = messagebox.askyesno('Invalid folder', 'No folder selected.\n\nCSV file will not be saved.\nDo you want to continue?')
+            if not csv_answare:
+                return
+
             # Update CSV section (GUI)
             csv_file = tk.IntVar()
             csv_file.set(0)
             tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Export data as CSV file', variable=csv_file, command=lambda: GUI.update_folder(self, csv_file, 1)).grid(row=8, column=1, padx=25, sticky='ew')
             GUI.update_folder(self, csv_file, 1)
-
-            # Notify the error to the user
-            csv_answare = messagebox.askyesno('Invalid folder', 'No folder selected.\nCSV file will not be saved.\nDo you want to continue?')
-            if not csv_answare:
-                return
 
         # "Lock" play button
         tk.Button(self.root, font=self.lato13, bg='#b3fc8d', fg='#242424', text='Playing', width=8, state='disabled').grid(row=13, column=0, columnspan=2)
@@ -609,6 +577,10 @@ class GUI:
         self.root.update()
 
     def run(self, source, dp, sts, ticket, ticket_folder, CSV, CSV_folder):
+
+        # Clean .tmp folder
+        for photo in os.listdir('.tmp')[:]:
+            os.remove('.tmp/{}'.format(photo))
 
         video = Video(self.net, self.classes, source, dp, sts)
 
@@ -625,13 +597,63 @@ class GUI:
             if play.exitcode == 0:
                 timeout = 0.1
                 if not len(os.listdir('.tmp')):
-                    os.kill(detect.pid, 9)
+                    os.kill(detect.pid, 9) 
                     break
             sleep(timeout)
-        
-        messagebox.showinfo('Detection completed', 'Object detected:\n[...]')
 
+def timer(year, month, day, h, m, s):
+
+    # Update the timer on the camera screen
+    if s < 59:
+        s += 1
+    else:
+        s = 0
+        if m < 59:
+            m += 1
+        else:
+            m = 0
+            if h < 23:
+                h += 1
+            else:
+                h = 0
+                if day < monthrange(year, month)[1]:
+                    day += 1
+                else:
+                    day = 1
+                    if month < 12:
+                        month += 1
+                    else:
+                        month = 1
+                        year += 1
+    
+    # Normalise values before returning
+    if s < 10: s = '0' + str(s)
+    if m < 10: m = '0' + str(m)
+    if h < 10: h = '0' + str(h)
+    if day < 10: day = '0' + str(day)
+    if month < 10: month = '0' + str(month)
+    if year < 10: year = '0' + str(year)
+    
+    return year, month, day, h, m, s
+
+def message(code, status):
+
+    # Code list
+    # 0: something on the road
+    # 1: unknown object on the road
+    # 2: no object detected
+    # 3: multiple object detected
+
+    if code != 2:
+        messagebox.showwarning('ATTENTION', status[status.index(':') + 1 : ])
+    else:
+        messagebox.showwarning('ERROR', status[status.index(':') + 1 : ])
+    
 if __name__ == '__main__':
+
+    # Import camera settings
+    with open('CAMERA_SETTINGS.json', 'r') as f:
+        CAMERA_SETTINGS = json.load(f)
     
     # Start SmarTraffic
     GUI()

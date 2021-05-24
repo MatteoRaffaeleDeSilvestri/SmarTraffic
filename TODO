@@ -2,10 +2,10 @@
 
 ☐ Prepara la presentazione ed il file README @started(21-05-20 15:14)
 ☐ Add a resume window after palying a video that show vehicle detected (ticket generated) and something else @started(21-05-20 21:56)
-☐ Notify when a danger is find on the road (es.person)
+☐ Sistema larghezza activebackground STEP 1
 
-- Visione notturna 
-- Stabilizzare FPS
+☐ Visione notturna
+☐ Stabilizzare FPS
 - Cambio/invasione di corsia
 - Ottimizzazione timeout camera (diversificazione basata sui dati del traffico: es. giorno/notte - adesso si basa sul rapporto auto/minuto)
 - Sorpassi
@@ -30,6 +30,7 @@
 ☐ GENERAL DOCUMENT REVIEW
 
 Archive:
+  ✘ Notify when a danger is find on the road (es.person) @cancelled(21-05-24 12:36)
   ✔ Timeout modified: test it! @done(21-05-20 21:56)
   ✘ Salva dati nel CSV sole dei veicoli!!! @cancelled(21-05-20 21:52)
   ✔ Make GUI a bit more stylish @started(21-05-19 20:30) @done(21-05-19 20:43) @lasted(13m36s)
