@@ -177,12 +177,14 @@ class Video:
             if self.stats:
                 cv2.rectangle(frame, (5, 5), (160, 105), (200, 200, 200), -1)
                 cv2.putText(frame, 'FPS: {}'.format(FPS), (8, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
-                cv2.putText(frame, 'Coming: {}'.format(vehicle_count_SX), (8, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
+                cv2.putText(frame, 'Entering: {}'.format(vehicle_count_SX), (8, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
                 cv2.putText(frame, 'Leaving: {}'.format(vehicle_count_DX), (8, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
                 cv2.putText(frame, 'Total: {}'.format(vehicle_count_SX + vehicle_count_DX), (8, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
 
             # Show the video (and layer)
             cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], frame)
+            
+            # Enable the code below to see how the camera "see" the video 
             # cv2.imshow('Left lane', mask_SX)
             # cv2.imshow('Right lane', mask_DX)
 
@@ -261,18 +263,15 @@ class Video:
                         obj = '{} - '.format(str(self.classes[class_ids[indexes.flatten()[0]]]))
                         confidence = '{}%'.format(str(round(confidences[indexes.flatten()[0]] * 100, 1)))
                         if photo[photo.index('_') + 1] == 'C':
-                            direction = 'Coming'
+                            direction = 'Entering'
                         else:
                             direction = 'Leaving' 
                         
                         if obj[ : len(obj) - 3] not in self.vehicles:
                             if obj[ : len(obj) - 3] in self.other_object :
                                 status = 'ATTENTION: {} on the road'.format(obj[ : len(obj) - 3])
-                                message(0, status)
                             else:
                                 status = 'ATTENTION: object on the road'
-                                message(1, status)
-
                             status_color = (0, 43, 214)
 
                         else:
@@ -291,11 +290,10 @@ class Video:
                             obj = '-'
                             confidence = ''
                             if photo[photo.index('_') + 1] == 'C':
-                                direction = 'Coming'
+                                direction = 'Entering'
                             else:
                                 direction = 'Leaving'
                             status = 'ERROR: no object detected'
-                            message(2, status)
                             status_color = (0, 179, 219)
 
                         # Multiple object detected in the photo
@@ -304,11 +302,10 @@ class Video:
                             obj = '-'
                             confidence = ''
                             if photo[photo.index('_') + 1] == 'C':
-                                direction = 'Coming'
+                                direction = 'Entering'
                             else:
                                 direction = 'Leaving'
                             status = 'ERROR: multiple object detected'
-                            message(3, status)
                             status_color = (0, 179, 219)
 
                             for i in indexes.flatten():
@@ -635,19 +632,6 @@ def timer(year, month, day, h, m, s):
     if year < 10: year = '0' + str(year)
     
     return year, month, day, h, m, s
-
-def message(code, status):
-
-    # Code list
-    # 0: something on the road
-    # 1: unknown object on the road
-    # 2: no object detected
-    # 3: multiple object detected
-
-    if code != 2:
-        messagebox.showwarning('ATTENTION', status[status.index(':') + 1 : ])
-    else:
-        messagebox.showwarning('ERROR', status[status.index(':') + 1 : ])
     
 if __name__ == '__main__':
 
