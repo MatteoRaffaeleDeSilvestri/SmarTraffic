@@ -13,14 +13,14 @@
 
     "camera_2" : {
         "Title" : "SS7 - Via Appia Lato Itri",
-        "BackgroundSubtractor" : [50, 100],
-        "ROI_SX" : [200, 700, 280, 580],
-        "ROI_DX" : [200, 700, 480, 780],
+        "BackgroundSubtractor" : [40, 40],
+        "ROI_SX" : [200, 700, 260, 560],
+        "ROI_DX" : [200, 700, 560, 860],
         "Surface" : 1000,
-        "DetectionPoint" : [350, 450, 750, 450],
-        "Area_SX" : [200, 600, 250, 580],
-        "Area_DX" : [350, 750, 530, 830],
-        "Date-time" : "10/05/2021 - 17:45:39"
+        "DetectionPoint" : [350, 450, 720, 450],
+        "Area_SX" : [150, 550, 260, 560],
+        "Area_DX" : [300, 700, 520, 820],
+        "Date-time" : "10/05/2021 - 19:28:53"
     },
 
     "camera_3" : {
