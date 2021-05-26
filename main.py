@@ -419,7 +419,7 @@ class GUI:
         # Show live statistics
         sts = tk.IntVar()
         sts.set(0)
-        tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Show live statistics   ', variable=sts, width=28).grid(row=5, column=1, padx=21, sticky='w')
+        tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Show live statistics   ', variable=sts, width=28).grid(row=5, column=1, padx=22, sticky='w')
 
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=6, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
@@ -575,7 +575,7 @@ class GUI:
 
     def run(self, source, dp, sts, ticket, ticket_folder, CSV, CSV_folder):
 
-        # Clean .tmp folder
+        # Clean .tmp folder from olt photos (if present)
         for photo in os.listdir('.tmp')[:]:
             os.remove('.tmp/{}'.format(photo))
 

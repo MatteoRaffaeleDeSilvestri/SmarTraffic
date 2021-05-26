@@ -1,8 +1,5 @@
-☐ Controlla grammatica commenti
-
+☐ Controlla grammatica commenti @started(21-05-26 22:35)
 ☐ Prepara la presentazione ed il file README @started(21-05-20 15:14)
-☐ Add a resume window after palying a video that show vehicle detected (ticket generated) and something else @started(21-05-20 21:56)
-☐ Sistema larghezza activebackground STEP 1
 
 ☐ Visione notturna
 ☐ Stabilizzare FPS
@@ -30,6 +27,8 @@
 ☐ GENERAL DOCUMENT REVIEW
 
 Archive:
+  ✘ Add a resume window after palying a video that show vehicle detected (ticket generated) and something else @started(21-05-20 21:56) @cancelled(21-05-26 22:32) @wasted(6d36m53s)
+  ✔ Sistema larghezza activebackground STEP 1 @done(21-05-26 22:35)
   ✘ Notify when a danger is find on the road (es.person) @cancelled(21-05-24 12:36)
   ✔ Timeout modified: test it! @done(21-05-20 21:56)
   ✘ Salva dati nel CSV sole dei veicoli!!! @cancelled(21-05-20 21:52)
