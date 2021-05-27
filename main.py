@@ -25,18 +25,18 @@ class Video:
         self.detection_point = dp
         self.stats = sts
 
-        # Type of vehicle that can be seen on the road
+        # Type of vehicle that can be seen on the road (from coco.names)
         self.vehicles = {'Bicycle', 'Car', 'Motorbike', 'Bus', 'Truck', 'Boat'}
 
-        # Common thing to be aware of during drive (mostly other person and animals)
+        # Common things to be aware of during drive (other person and animals mostly)
         self.other_object = {'Person', 'Cat', 'Dog', 'Horse', 'Sheep', 'Cow', 'Bear', 'Bird'}
 
     def play(self):
 
-        # Set mini logo fro camera screen
+        # Set mini logo from camera screen
         logo_mini = cv2.imread('resources/logo_mini.png')
 
-        # Take video frome source 
+        # Take video from source 
         source = self.camera
         capture = cv2.VideoCapture(source)
        
@@ -53,10 +53,9 @@ class Video:
         # Set date and time
         date = CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"][ : CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"].index('-') - 1].split('/')
         clock = CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"][CAMERA_SETTINGS[source[6 : len(source) - 4]]["Date-time"].index('-') + 2 : ].split(':')
-
         year, month, day, hh, mm, ss = timer(int(date[2]),  int(date[1]), int(date[0]), int(clock[0]), int(clock[1]),int(clock[2]))
 
-        # Object detection from camera
+        # Background subtractor from camera
         object_detector = cv2.createBackgroundSubtractorMOG2(history=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][0], varThreshold=CAMERA_SETTINGS[source[6 : len(source) - 4]]["BackgroundSubtractor"][1])
 
         while True:
@@ -68,10 +67,10 @@ class Video:
                 cv2.destroyAllWindows()
                 break
             
-            # Keep a "clean" copy of the frame for detection
+            # Keep a "clean" copy of the frame for detection (for ticket generation)
             original = deepcopy(frame)
 
-            # Start the timer for update the info on the screen
+            # Start the timer for update the info on the screen (update every second)
             start_update = time()
 
             # Define regions of interest (ROI)
@@ -80,11 +79,11 @@ class Video:
             roi_DX = frame[CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_DX"][0] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_DX"][1],
                            CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_DX"][2] : CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_DX"][3]]
 
-            # Generate mask for object
+            # Generate mask for ROI
             mask_SX = object_detector.apply(roi_SX)
             mask_DX = object_detector.apply(roi_DX)
 
-            # Remove "noise" in the image
+            # Remove "noise" from the frame
             _, mask_SX = cv2.threshold(mask_SX, 254, 255, cv2.THRESH_BINARY)
             _, mask_DX = cv2.threshold(mask_DX, 254, 255, cv2.THRESH_BINARY)
 
@@ -92,7 +91,7 @@ class Video:
             contours_SX, _ = cv2.findContours(mask_SX, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             contours_DX, _ = cv2.findContours(mask_DX, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             
-            # Find contours SX
+            # Find contours ROI_SX
             for contours in contours_SX:
 
                 # Check areas and ignore small elements
@@ -104,7 +103,7 @@ class Video:
                     if CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] + y <= CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1] <= CAMERA_SETTINGS[source[6 : len(source) - 4]]["ROI_SX"][0] + y + h:
                         passing_SX = True
 
-            # Find contours DX
+            # Find contours ROI DX
             for contours in contours_DX:
 
                   # Check areas and ignore small elements
@@ -121,7 +120,7 @@ class Video:
                 cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                 (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (0, 0, 255), 2)
             
-            # Take a picture of the left lane (ROI)
+            # Take a picture of left lane (ROI)
             if passing_SX:
                 if '{}.png'.format(str(vehicle_SX_ID) + '_C')[ : '{}'.format(str(vehicle_SX_ID) + '_C').index('C') + 1] not in [photo[ : '{}'.format(str(vehicle_SX_ID) + '_C').index('C') + 1] for photo in os.listdir('.tmp')]:
                     vehicle_count_SX += 1
@@ -133,7 +132,7 @@ class Video:
                     cv2.line(frame, (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0], CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][1]),
                                     (CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0] + ((CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][2] - CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][0]) // 2), CAMERA_SETTINGS[source[6 : len(source) - 4]]["DetectionPoint"][3]), (255, 255, 255), 2)
             
-            # Take a picture of the right lane (ROI)
+            # Take a picture of right lane (ROI)
             if passing_DX:
                 if '{}.png'.format(str(vehicle_DX_ID) + '_L')[ : '{}'.format(str(vehicle_DX_ID) + '_L').index('L') + 1] not in [photo[ : '{}'.format(str(vehicle_SX_ID) + '_L').index('L') + 1] for photo in os.listdir('.tmp')]:
                     vehicle_count_DX += 1
@@ -153,12 +152,12 @@ class Video:
             passing_DX = False
             
             # Wait for ESC key to stop
-            if cv2.waitKey(30) != -1:
+            if cv2.waitKey(30) == 27:
                 capture.release()
                 cv2.destroyAllWindows()
                 break
 
-            # Update data on the screen (almost) every second
+            # Update data on the screen (almost every second)
             end_update = time()
             update_interval += end_update - start_update
             if update_interval >= 1:
@@ -169,7 +168,7 @@ class Video:
             # Default camera info
             cv2.rectangle(frame, (5, 775), (1075, 805), (230, 230, 230), -1)
             cv2.putText(frame, 'Powered by', (10, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
-            cv2.putText(frame, 'Press any key to stop the video', (345, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 1)
+            cv2.putText(frame, 'Press ESC to stop the video', (370, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 1)
             frame[777 : 804 , 145 : 244] = logo_mini
             cv2.putText(frame, '{}/{}/{} - {}:{}:{}'.format(day, month, year, hh, mm, ss), (788, 797), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
 
@@ -181,16 +180,14 @@ class Video:
                 cv2.putText(frame, 'Leaving: {}'.format(vehicle_count_DX), (8, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
                 cv2.putText(frame, 'Total: {}'.format(vehicle_count_SX + vehicle_count_DX), (8, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
 
-            # Show the video (and layer)
+            # Show the video
             cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], frame)
-            
-            # Enable the code below to see how the camera "see" the video 
             # cv2.imshow('Left lane', mask_SX)
             # cv2.imshow('Right lane', mask_DX)
 
     def detector(self, tkt, tkt_folder, CSV, CSV_folder):
 
-        # Prepare CSV as database
+        # Prepare CSV file as database
         if CSV:
             with open('{}/data.csv'.format(CSV_folder), 'w') as data:
                 data_input = csv.writer(data, delimiter=',')
@@ -201,7 +198,7 @@ class Video:
 
         while True:
 
-            # Check if there are photo to analyse
+            # Check if there are photos to analyse
             if len(os.listdir('.tmp')):
 
                 # Prepare the base for the ticket to generate
@@ -255,7 +252,7 @@ class Video:
                     # Get ticket image base to fill with informations
                     ticket = base.copy()
                     
-                    # One object detected in the photo
+                    # STANDARD CASE: one object detected in the photo
                     if len(indexes) == 1:
 
                         x, y, w, h = boxes[indexes.flatten()[0]]
@@ -281,7 +278,7 @@ class Video:
 
                         cv2.rectangle(img, (x, y), (x + w, y + h), status_color, 2)
 
-                    # Manage detection anomalies
+                    # OTHER CASES: manage detection anomalies
                     else:
                         
                         # No object detected in the photo
@@ -332,7 +329,7 @@ class Video:
                         ticket_counter += 1
                         cv2.imwrite('{}/ticket_{}.png'.format(tkt_folder.split(' ')[0], ticket_counter), ticket)
 
-                    # Add record to CSV database
+                    # Add record to CSV file
                     if CSV:
                         with open('{}/data.csv'.format(CSV_folder), 'a') as data:
                             data_input = csv.writer(data, delimiter=',')
@@ -363,7 +360,7 @@ class GUI:
             cam_number += 1
             self.cameras.setdefault('Camera {} - {}'.format(cam_number, CAMERA_SETTINGS[camera]["Title"]), 'camera_{}.mp4'.format(cam_number))
 
-        # Prepare the object recognition system (YOLOv4)
+        # Prepare the object recognition system (YoloV4)
         self.net = cv2.dnn.readNet('yolo/yolov4.weights', 'yolo/yolov4.cfg')
         
         self.classes = list()
@@ -395,7 +392,7 @@ class GUI:
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=2, column=0, columnspan=2, padx=10, sticky='ew')
 
-        # Step 1
+        # STEP 1
         tk.Label(self.root, font=lato12, fg='#242424', text='STEP 1\nChoose a camera from the menù below and the information you want\nto display on the camera screen').grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky='ew')
 
         # Initialise and show dropdown menù
@@ -424,7 +421,7 @@ class GUI:
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=6, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
 
-        # Step 2
+        # STEP 2
         tk.Label(self.root, font=lato12, fg='#242424', text='STEP 2\nChoose if to generate or not the tickets and the CSV data file').grid(row=7, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
 
         # Save ticket
@@ -450,7 +447,7 @@ class GUI:
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=11, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
 
-        # Step 3
+        # STEP 3
         tk.Label(self.root, font=lato12, fg='#242424', text='STEP 3\nPress \"Play\" and see how the program work').grid(row=12, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
 
         # Play button
@@ -463,7 +460,7 @@ class GUI:
         tk.Label(self.root, font=lato12, fg='#242424', text='Need some help?').grid(row=15, column=0, columnspan=2)
         tk.Button(self.root, font=self.lato12italic, fg='#242424', activeforeground='#001263', text='Check out the documentation', command=lambda: webbrowser.open('https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic', new=0, autoraise=True)).grid(row=16, column=0, columnspan=2, padx=10, pady=5)
 
-        # Sign 
+        # Author
         tk.Label(self.root, font=lato10italic, fg='#a0a0a0', text='MatteoRaffaeleDeSilvestri').grid(row=17, column=0, columnspan=2, sticky='e')
 
         # Start main loop (GUI)
@@ -504,7 +501,7 @@ class GUI:
             self.tkt_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n - ', width=40)
             self.tkt_folder.grid(row=10, column=col, padx=25, sticky='ew')
 
-        # Choose the destination folder for the generated file
+        # Choose the destination folder for generated file
         folder = filedialog.askdirectory(mustexist=True)
         
         if type(folder) == str and os.path.isdir(str(folder)):
@@ -525,7 +522,7 @@ class GUI:
                 
             else:
 
-                # "Reset" the folder
+                # "Reset" folder
                 if col:
                     self.csv_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n - ', width=40)
                     self.csv_folder.grid(row=10, column=col, padx=25, sticky='ew')
@@ -575,7 +572,7 @@ class GUI:
 
     def run(self, source, dp, sts, ticket, ticket_folder, CSV, CSV_folder):
 
-        # Clean .tmp folder from olt photos (if present)
+        # Clean .tmp folder from old photos (if present)
         for photo in os.listdir('.tmp')[:]:
             os.remove('.tmp/{}'.format(photo))
 
@@ -591,16 +588,21 @@ class GUI:
 
         timeout = 1
         while True:
+
+            # Keep running until the video isn't ended (or the user stops it)
             if play.exitcode == 0:
                 timeout = 0.1
+
+                # If the video is ended complete detection on photos on .tmp folder (if present)
                 if not len(os.listdir('.tmp')):
                     os.kill(detect.pid, 9) 
                     break
+
             sleep(timeout)
 
 def timer(year, month, day, h, m, s):
 
-    # Update the timer on the camera screen
+    # Give the timer a proper format for visualization
     if s < 59:
         s += 1
     else:
@@ -623,7 +625,7 @@ def timer(year, month, day, h, m, s):
                         month = 1
                         year += 1
     
-    # Normalise values before returning
+    # "Normalise" values before returning
     if s < 10: s = '0' + str(s)
     if m < 10: m = '0' + str(m)
     if h < 10: h = '0' + str(h)
