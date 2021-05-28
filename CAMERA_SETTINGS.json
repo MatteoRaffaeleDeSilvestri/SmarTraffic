@@ -37,13 +37,13 @@
     
     "camera_4" : {
         "Title" : "SS7 - Via Appia Lato Roma",
-        "BackgroundSubtractor" : [100, 20],
-        "ROI_SX" : [200, 700, 250, 550],
-        "ROI_DX" : [200, 700, 500, 800],
+        "BackgroundSubtractor" : [70, 40],
+        "ROI_SX" : [200, 700, 350, 600],
+        "ROI_DX" : [200, 700, 550, 800],
         "Surface" : 1000,
-        "DetectionPoint" : [340, 400, 720, 400],
-        "Area_SX" : [200, 700, 250, 580],
-        "Area_DX" : [200, 700, 530, 830],
-        "Date-time" : "13/05/2021 - 17:45:39"
+        "DetectionPoint" : [300, 500, 850, 500],
+        "Area_SX" : [200, 700, 350, 680],
+        "Area_DX" : [300, 800, 530, 830],
+        "Date-time" : "13/05/2021 - 11:17:02"
     }
 }

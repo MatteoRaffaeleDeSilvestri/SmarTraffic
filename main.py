@@ -182,8 +182,8 @@ class Video:
 
             # Show the video
             cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], frame)
-            # cv2.imshow('Left lane', mask_SX)
-            # cv2.imshow('Right lane', mask_DX)
+            cv2.imshow('Left lane', mask_SX)
+            cv2.imshow('Right lane', mask_DX)
 
     def detector(self, tkt, tkt_folder, CSV, CSV_folder):
 
@@ -505,8 +505,10 @@ class GUI:
         folder = filedialog.askdirectory(mustexist=True)
         
         if type(folder) == str and os.path.isdir(str(folder)):
+
             if col:
                 self.csv_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n{}'.format(folder), width=40)
+
                 self.csv_folder.grid(row=10, column=col, padx=25, sticky='ew')
             else:
                 self.tkt_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n{}'.format(folder), width=40)
