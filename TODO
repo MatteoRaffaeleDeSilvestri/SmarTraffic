@@ -1,4 +1,9 @@
 ☐ Prepara la presentazione ed il file README @started(21-05-20 15:14)
+☐ GENERAL DOCUMENT REVIEW
+
+☐ NOTA: camera 4 con visuale più verticale risulta inefficiente rispetto alle altre telecamere settate più orizzontalmente
+☐ Inserisci una sezione con le osservazioni fatte durante il progetto
+☐ Anche rimaneggiando i file di YoloV4 i risultati risultano pressochè invariati, si è quindi optato per la configurazione più preformante in termini di velocità
 
 ☐ Visione notturna
 ☐ Stabilizzare FPS
@@ -21,9 +26,9 @@
 - Database per l'analisi e la lettura dei dati nel lungo periodo
 - Agevolare l'inserimento di nuove videocamere nel documento CAMERA_SETTINGS
 
-☐ GENERAL CODE REVIEW
-☐ GENERALE TEST FOR ALL CAMERAS
-☐ GENERAL DOCUMENT REVIEW
+✔ GENERAL CODE REVIEW @done(21-05-28 22:45)
+✔ GENERALE TEST FOR ALL CAMERAS @done(21-05-28 23:01)
+
 
 Archive:
   ✔ Controlla grammatica commenti @started(21-05-26 22:35) @done(21-05-27 10:31) @lasted(11h56m50s)
