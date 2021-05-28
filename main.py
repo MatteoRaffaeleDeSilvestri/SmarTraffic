@@ -182,8 +182,10 @@ class Video:
 
             # Show the video
             cv2.imshow(CAMERA_SETTINGS[source[6 : len(source) - 4]]["Title"], frame)
-            cv2.imshow('Left lane', mask_SX)
-            cv2.imshow('Right lane', mask_DX)
+            
+            # Uncomment code below to see the mask on the video  
+            # cv2.imshow('Left lane', mask_SX)
+            # cv2.imshow('Right lane', mask_DX)
 
     def detector(self, tkt, tkt_folder, CSV, CSV_folder):
 
@@ -513,6 +515,7 @@ class GUI:
             else:
                 self.tkt_folder = tk.Label(self.root, font=self.lato12italic, fg='#242424', text='Current folder:\n{}'.format(folder), width=40)
                 self.tkt_folder.grid(row=10, column=col, padx=25, sticky='ew')
+        
         else:
 
             # Ask what to do to the user
