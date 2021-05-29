@@ -1,6 +1,8 @@
 ☐ Prepara la presentazione ed il file README @started(21-05-20 15:14)
 ☐ GENERAL DOCUMENT REVIEW
 
+☐ Esclusione di Darknet per motivi di compatibilità hardware
+
 ☐ NOTA: camera 4 con visuale più verticale risulta inefficiente rispetto alle altre telecamere settate più orizzontalmente
 ☐ Inserisci una sezione con le osservazioni fatte durante il progetto
 ☐ Anche rimaneggiando i file di YoloV4 i risultati risultano pressochè invariati, si è quindi optato per la configurazione più preformante in termini di velocità
