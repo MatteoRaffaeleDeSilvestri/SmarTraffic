@@ -3,13 +3,14 @@
 ## Tabel of content
 
 * [Introduction](#Introduction "Go to the section")
-    - [The idea](#The-idea "Go to the subsection")
+    * [The idea](#The-idea "Go to the subsection")
 * [Setup](#Setup "Go to the section")
 * [How it works](#How-it-works "Go to the section")
-    - [GUI](#GUI "Go to the subsection")
-    - [Video](#Video "Go to the subsection")
-    - [File management](#File-management "Go to the subsection")
+    * [GUI](#GUI "Go to the subsection")
+    * [Video](#Video "Go to the subsection")
+    * [File management](#File-management "Go to the subsection")
 * [Practical application](#Practical-application "Go to the section")
+* [Possible improvements](#Possible-improvements "Go to the section")
 * [License](#License "Go to the section")
 
 ## Introduction
@@ -30,17 +31,15 @@ Fondi has four main access roads from the nearby towns:
 ![](resources/map.png "Main road access to Fondi")
 
 Traffic in town can be more or less heavy depending on the amount and the type of entering and leaving vehicles, and because there are four main ways to enter and leave the town 
-(<i>SP99 is a mountain road, generally not very busy</i>), i decided to use four different cameras (one for each road) to keep track of the traffic.
+(<i>without considering SP99 that is a mountain road, generally not very busy</i>), i decided to use four different cameras (one for each road) to keep track of the traffic.
 
 Making some research about the existing technologies to accomplish this task, i realised that is a very common practice to put the result of detection directly <i>"on top"</i> of the image (or <i>frame</i> in case of video) the detection has been done.
 
 ![](resources/detection.png "Result of object detection on an image")
 
-Even if this practice give result that are cool to see in a real case scenario it's useless. Considering that <i><b>object recognition systems</b></i> works as emulator of human capability to see and identify objects, in a situation where there is someone watching directly at the screen there is no point to have all those colorfull things on the image. For a person is just easyer to look directly at the screen and figure out what he is looking at by themself.
+Even if this practice give result that are cool to see, in a real case scenario it's useless. Considering that <i><b>object recognition systems</b></i> works as emulator of human capability to see and identify objects, in a situation where there is someone watching directly at the screen there is no point to have all those colorfull things on the image. For a person is just easyer to look directly at the screen and figure out what he is looking at by themself.
 
-SmarTraffic goal is to create a <i>real-time traffic control system</i> that allow the operator to be more efficient at work instead of just looking straight at the monitor for hours.
-
-In particular, this project is mean to realise a <b>real-time traffic control system</b> that help operators to control and prevent traffic anomalies such as heavy traffic, accident, etc. by automating all the operations that normally would be performed by a human:
+SmarTraffic goal is to create a <i>real time traffic control system</i> that make operators work more efficient, by helping them to control and prevent traffic anomalies (such as heavy traffic, accident, etc.) by automating all the operations that normally would be performed by a human:
 
 - Traffic visualization in real time (<i>trough live cameras</i>);
 - Calculate the quantity and direction of vehicles in transit;
@@ -49,15 +48,15 @@ In particular, this project is mean to realise a <b>real-time traffic control sy
 - Identify abnormal and/or potentially dangerous situations;
 - Collect data for long-term traffic analysis and prediction.
 
+<b>NOTE</b>: <i>Actually this is a demo version of SmarTraffic. There are a lot of improvements that can be done to make this program more efficient and useful. Check out the [Possible improvements](#Possible-improvements "Go to the section") section to learn more about.</i> 
+
 ## Setup
 
 The program has been written in <b><i>Python 3.8.5</i></b>.<br>
 In addition, the following libraries are required:
 
-<ul>
-    <li><b>OpenCV</b> (version: <i>4.5.1.48</i>);</li>
-    <li><b>Pillow</b> (version: <i>8.2.0</i>).</li>
-</ul>
+- <b>OpenCV</b> (version: <i>4.5.1.48</i>);
+- <b>Pillow</b> (version: <i>8.2.0</i>).
 
 If not already installed on the system, they can be installed both individually (<u><i>is strongly suggested to install the exact verison specified for each library</i></u>) or by following the instructions below:
 
@@ -68,26 +67,103 @@ If not already installed on the system, they can be installed both individually 
     ```console
     pip3 install -r requirements.txt
     ```
+To run the program just go to the project folder and excute the following command:
+
+```console
+python main.py
+```
 
 ## How it works
 
-The idea this project is based on is to find a way to use <b><i>real-time detection</i></b> that is fast to develop, easy to maintain, potentially scalable and usable in a real case scenario.
-
 ### GUI
 
-SmarTraffic has a simple <i>graphic user interface</i> (<i>GUI</i>) that help the user to acces the informations he need.
+At the start the following screen will appear:
 
 ![](resources/GUI.png "SmarTraffic")
 
-# Describe gui function [...]
+SmarTraffic has a simple <i>graphic user interface</i> (<i>GUI</i>) that help the user to acces the informations he need.
+
+The GUI has the following structure:
+
+* SmarTraffic logo and welcome message for the user;
+
+* <b>STEP 1</b>: Here the user can choose one of the four camera source (each camera has the name of the road on which it's placed and each video last about a minute). The user can also choose if to see or not the detection point and the live statistics on the screen;
+
+* <b>STEP 2</b>: In this section the user can choose if to save or not the file generated by the detection system. The file that can be generated are:
+    
+    * <u>Ticket file</u> ("<i>.png</i>"): contains information about the detection made;
+
+        ![](resources/Ok_ticket.png "An example of ticket")
+    
+    * <u>Data file</u> ("<i>.csv</i>"): save a record for each detection made.
+
+        ![](resources/data.png "An example of data file")
+
+    The idea behind this two methods is that the first one can be used to have  immediate information about each detection, while the second one can be use for long term purposes (<i>e.g. traffic prevision</i>);
+
+    <b>IMPORTANT</b>: For both ticket and data, to save the file a destination folder must be chosen. To avoid this kind of errors, the program is designed to report the absence of destination folder.
+
+* <b>STEP 3</b>: Just press "<i>Play</i>" button;
+
+    <b>NOTE</b>: Once the video is terminated, the program will take a few moments to complete the analysis of detections. Until then, "Play" button will not be "<i>clickable</i>" ("<i>Playing</i>" button will be shown instead).
+
+* "<i>Help</i>" section: the user can click on the button to check the documentation (via browser) and have more informations about the program.
 
 ### Video
 
+To avoid affecting the frame rate the video is displayed separately from the GUI.
+
+![](resources/screen.png "An example of video")
+
+In addition to the video itself, the following information are shown:
+
+- <b>Road name</b>: shown as window title;
+
+- <b>Live statistics</b>: on top-left of the screen, it indicates the <i>FPS</i>, the <i>number of entering and leaving vehicles</i> and the <i>total numer of vehicles in transit</i> (<u>can be enabled/disabled from the GUI</u>);
+
+- <b>Detection point</b>: the red line crossing the road. It turn white when a vehicle is passing over it (<u>can be enabled/disabled from the GUI</u>);
+
+- <b>General information</b>: the information bar on the bottom of the screen. Indicates the name of the program (on the left), the button to press ("<i>ESC</i>") to interrupt the video (on the center) and date and time of the video (on the right).
+
 ### File management
+
+In case the user decide to save the file (ticket and/or data), this is how the program manage those files.
+
+For each detection made on the video, the image is processed by Yolo. The information taken from the video (vehicle ID, road name, direction, date and time) are added to the information generated by Yolo object recognition system. Those information can be combined into a single file (for ticket file) or a record (for data file).
+
+For ticket file, the information are "printed" on an empty ticket and a photo of the object detected is attached on the left side. Then the file is saved as "<i>.png</i>" file on the folder indicated by the user on the GUI.
+
+For data file, at the start of video, an empty CSV file is created on the folder indicated by the user on the GUI. At this file is immediately added an "header" which indicates the type of information represented: <i>vehicle ID</i>, <i>area</i>, <i>detection</i>, <i>confidence</i>, <i>direction</i>, <i>date</i>, <i>time</i> and <i>status</i>.<br>For each detection, a new line (<i>record</i>) is added to the file.
+
+<b>ATTENTION</b>: <i>for both type of file, if on the destination folder there is a file with the same name of the one the program is generating, this will be overwritten!</i>
 
 ## Practical application
 
-Explain how the information can be used in practical way
+As said before, SmarTraffic is mean to create a system that prevent road congestion by monitoring traffic in real time, while collecting and analysing data for long term prevision.
+
+Below there are some example of potential benefits that SmarTraffic can provide.
+
+<i>In summer, Via Fondi-Sperlonga is usually heavy trafficated because is the main road that conduct to the sea. With SmarTraffic will be possible to know at wich times of the day this road is more or less trafficated and take some measure to "redistribute" traffic  during the day;</i>
+
+<i>SS7 and SR637 converge into the town in a crossroad near the hospital and, in case of heavy traffic, this can slow down the ambulance (or other hospital vehicles). SmarTraffic can use the collected data to predict when this road will be trafficated and warn the health professionals about the situation.</i>
+
+<i>In case of road surface maintenance work, will be possible to know in which period the road is less trafficated, in order to minimize the hardships for the population.</i>
+
+## Possible improvements
+
+A list of features to add/improve to SmarTraffic:
+
+- Night vision;
+- Lane change/overtake detection;
+- Speed detection;
+- Recommended speed calculation (<i>prevention of traffic congestion</i>);
+- Accident recognition;
+- Possibility of display multiple cameras simultaneously;
+- Use of "ad-hoc" weights for YoloV4 detection (<i>the actual program use pre-trained weights</i>);
+- Use of specific type of cameras on the road (<i>e.g. using cameras with 180° view field, will be possible to see the vehicles coming from both side frontally</i>);
+- Facilitate the insertion of new settings for cameras (<i>in CAMERA_SETTINGS.json file</i>);
+- General multiprocessing optimization (<i>e.g. use collected data to set "timeout" value dinamically</i>);
+
 
 ## License
 
