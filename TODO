@@ -1,38 +1,32 @@
 ☐ Prepara la presentazione ed il file README @started(21-05-20 15:14)
 ☐ GENERAL DOCUMENT REVIEW
 
-☐ Esclusione di Darknet per motivi di compatibilità hardware
-
 ☐ NOTA: camera 4 con visuale più verticale risulta inefficiente rispetto alle altre telecamere settate più orizzontalmente
 ☐ Inserisci una sezione con le osservazioni fatte durante il progetto
 ☐ Anche rimaneggiando i file di YoloV4 i risultati risultano pressochè invariati, si è quindi optato per la configurazione più preformante in termini di velocità
 
-☐ Visione notturna
-☐ Stabilizzare FPS
-- Cambio/invasione di corsia
-- Ottimizzazione timeout camera (diversificazione basata sui dati del traffico: es. giorno/notte - adesso si basa sul rapporto auto/minuto)
-- Sorpassi
-- Controllo elettronico della velocità
-- Velocità ideale per la marcia
-- Visione di più telecamere simultaneamente
-- Riconoscimento incidenti
-- Stime di interventi per la viabilità in base a momenti in cui il traffico si prevede sia minore
-
-- Multiprocessing ottimizzato (refactoring totale del codice!)
-- Stima dinamica dei timeout dei processi in background basato su dati pregressi (es. lavora forte nei giorin d'estate e quasi nulla nelle notti invernali)
-- Uso di "pesi" allenati ad-hoc (yolo4.weights) per questo genere di letture
-
-- Uso di telecamere in alta definizione con campo visiovo di 180° per lettura frontale a doppia corsia più accurata
-- Maggiore supporto hardware (tecnologie cloud)
-- Sistema di collegamento IP invece del canonico circuito chiuso
-- Database per l'analisi e la lettura dei dati nel lungo periodo
-- Agevolare l'inserimento di nuove videocamere nel documento CAMERA_SETTINGS
-
-✔ GENERAL CODE REVIEW @done(21-05-28 22:45)
-✔ GENERALE TEST FOR ALL CAMERAS @done(21-05-28 23:01)
-
-
 Archive:
+  ✔ Multiprocessing ottimizzato (refactoring totale del codice!) @done(21-05-29 15:20)
+  ✔ Stima dinamica dei timeout dei processi in background basato su dati pregressi (es. lavora forte nei giorin d'estate e quasi nulla nelle notti invernali) @done(21-05-29 15:20)
+  ✔ Agevolare l'inserimento di nuove videocamere nel documento CAMERA_SETTINGS @done(21-05-29 15:18)
+  ✔ Database per l'analisi e la lettura dei dati nel lungo periodo @done(21-05-29 15:17)
+  ✘ Ottimizzazione timeout camera (diversificazione basata sui dati del traffico: es. giorno/notte - adesso si basa sul rapporto auto/minuto) @cancelled(21-05-29 15:16)
+  ✔ Uso di telecamere in alta definizione con campo visiovo di 180° per lettura frontale a doppia corsia più accurata @done(21-05-29 15:16)
+  ✘ Maggiore supporto hardware (tecnologie cloud) @cancelled(21-05-29 15:12)
+  ✔ Uso di "pesi" allenati ad-hoc (yolo4.weights) per questo genere di letture @done(21-05-29 15:12)
+  ✘ Sistema di collegamento IP invece del canonico circuito chiuso @cancelled(21-05-29 15:07)
+  ✔ Visione di più telecamere simultaneamente @done(21-05-29 15:07)
+  ✘ Esclusione di Darknet per motivi di compatibilità hardware @cancelled(21-05-29 15:02)
+  ✔ Riconoscimento incidenti @done(21-05-29 15:03)
+  ✔ Stime di interventi per la viabilità in base a momenti in cui il traffico si prevede sia minore @done(21-05-29 15:03)
+  ✔ Visione notturna @done(21-05-29 14:59)
+  ✘ Stabilizzare FPS @cancelled(21-05-29 14:59)
+  ✔ Cambio/invasione di corsia @done(21-05-29 14:59)
+  ✔ Sorpassi @done(21-05-29 14:59)
+  ✔ Controllo elettronico della velocità @done(21-05-29 15:00)
+  ✔ Velocità ideale per la marcia @done(21-05-29 15:01)
+  ✔ GENERAL CODE REVIEW @done(21-05-28 22:45)
+  ✔ GENERALE TEST FOR ALL CAMERAS @done(21-05-28 23:01)
   ✔ Controlla grammatica commenti @started(21-05-26 22:35) @done(21-05-27 10:31) @lasted(11h56m50s)
   ✘ Add a resume window after palying a video that show vehicle detected (ticket generated) and something else @started(21-05-20 21:56) @cancelled(21-05-26 22:32) @wasted(6d36m53s)
   ✔ Sistema larghezza activebackground STEP 1 @done(21-05-26 22:35)
