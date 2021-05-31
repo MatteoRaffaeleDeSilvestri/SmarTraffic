@@ -645,6 +645,9 @@ if __name__ == '__main__':
     # Import camera settings
     with open('CAMERA_SETTINGS.json', 'r') as f:
         CAMERA_SETTINGS = json.load(f)
-    
+
+    # Create '.tmp' folder (if not exsist)
+    if not os.path.isdir('.tmp'): os.mkdir('.tmp')
+
     # Start SmarTraffic
     GUI()
