@@ -1,6 +1,7 @@
 import os
 import cv2
 import csv
+import sys
 import json
 import numpy
 import webbrowser
@@ -187,7 +188,7 @@ class Video:
             # cv2.imshow('Left lane', mask_SX)
             # cv2.imshow('Right lane', mask_DX)
 
-    def detector(self, tkt, tkt_folder, CSV, CSV_folder):
+    def detector(self, mode, tkt, tkt_folder, CSV, CSV_folder):
 
         # Prepare CSV file as database
         if CSV:
@@ -346,6 +347,9 @@ class Video:
                     
                     # Delete original photo
                     os.remove('.tmp/{}'.format(photo))
+                
+                # Stop for "non-linux OS"
+                if mode: break
                     
             else:
 
@@ -580,30 +584,42 @@ class GUI:
         # Clean .tmp folder from old photos (if present)
         for photo in os.listdir('.tmp')[:]:
             os.remove('.tmp/{}'.format(photo))
-
+        
         video = Video(self.net, self.classes, source, dp, sts)
 
-        # Initialize process
-        play = multiprocessing.Process(target=video.play)
-        detect = multiprocessing.Process(target=video.detector, args=[ticket, ticket_folder, CSV, CSV_folder])
+        # Use multiprocessing to simulate real-time operations in linux OS 
+        if sys.platform == 'linux':
+        
+            # Initialize process
+            play = multiprocessing.Process(target=video.play, args=[])
+            detect = multiprocessing.Process(target=video.detector, args=[0, ticket, ticket_folder, CSV, CSV_folder])
 
-        # Starting multiprocessing procedure
-        play.start()
-        detect.start()
+            # Starting multiprocessing procedure
+            play.start()
+            detect.start()
 
-        timeout = 1
-        while True:
+            timeout = 1
+            while True:
 
-            # Keep running until the video isn't ended (or the user stops it)
-            if play.exitcode == 0:
-                timeout = 0.1
+                # Keep running until the video isn't ended (or the user stops it)
+                if play.exitcode == 0:
+                    timeout = 0.1
 
-                # If the video is ended complete detection on photos on .tmp folder (if present)
-                if not len(os.listdir('.tmp')):
-                    os.kill(detect.pid, 9) 
-                    break
+                    # If the video is ended complete detection on photos on .tmp folder (if present)
+                    if not len(os.listdir('.tmp')):
+                        os.kill(detect.pid, 9) 
+                        break
 
-            sleep(timeout)
+                sleep(timeout)
+        
+        # Manage detection procedure for "non-linux OS"
+        else:
+            
+            # Play video
+            video.play()
+
+            # Make object recognition (AFTER playing video)
+            video.detector(1, ticket, ticket_folder, CSV, CSV_folder)
 
 def timer(year, month, day, h, m, s):
 
