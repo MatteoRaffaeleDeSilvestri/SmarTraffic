@@ -73,6 +73,8 @@ To run the program just go to the project folder and excute the following comman
 python main.py
 ```
 
+<mark><b>DISCLAIMER: </b>This program use <u>multiprocessing module</u> (included in <i>Python Standard Library</i>). Because the code has been written and tested on Linux OS (<i>Ubuntu 20.04</i>) and considering that different OS handle process differently, the way the real-time factor is implemented can be different for one OS to another.</mark>
+
 ## How it works
 
 ### GUI
