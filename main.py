@@ -469,9 +469,13 @@ class GUI:
         # Author
         tk.Label(self.root, font=lato10italic, fg='#a0a0a0', text='MatteoRaffaeleDeSilvestri').grid(row=17, column=0, columnspan=2, sticky='e')
 
+        # OS detection
+        if sys.platform != 'linux':
+            messagebox.showinfo('Attention', 'The OS detected is different from Linux.\nThis will change both the program appearance and workflow.\nCheck out the documentation for more informations.')
+
         # Start main loop (GUI)
         self.root.mainloop()
-    
+
     def update_folder(self, var, col):
 
         # Update the button after selecting/deselecting the associated option
@@ -603,6 +607,7 @@ class GUI:
 
                 # Keep running until the video isn't ended (or the user stops it)
                 if play.exitcode == 0:
+                    
                     timeout = 0.1
 
                     # If the video is ended complete detection on photos on .tmp folder (if present)
@@ -617,6 +622,10 @@ class GUI:
             
             # Play video
             video.play()
+
+            # "Detection" button update
+            tk.Button(self.root, font=self.lato13, bg='#b3fc8d', fg='#242424', text='Detecting', width=8, state='disabled').grid(row=13, column=0, columnspan=2)
+            self.root.update()
 
             # Make object recognition (AFTER playing video)
             video.detector(1, ticket, ticket_folder, CSV, CSV_folder)
