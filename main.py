@@ -190,10 +190,17 @@ class Video:
 
     def detector(self, mode, tkt, CSV):
 
-        # Clean detections folder from old ticket (if present)
+        # Prepare 'detections' folder
         if tkt:
-            for ticket in os.listdir('detections')[:]:
-                os.remove(ticket)
+            if os.path.isdir('detections'):
+
+                # Clean detections folder from old ticket (if present)
+                for ticket in os.listdir('detections')[:]:
+                    os.remove(ticket)
+            else:
+
+                # Create 'detections' folder (if not present)
+                os.mkdir('detections')
 
         # Prepare CSV file as database
         if CSV:
@@ -382,6 +389,7 @@ class GUI:
         self.root = tk.Tk()
         self.root.title('[DEMO] SmarTraffic')
         self.root.resizable(False, False)
+        self.root.config(bg='#d8d8d8')
 
         # Set font style for GUI
         lato14 = tkFont.Font(family='Lato', size=14)
@@ -445,24 +453,26 @@ class GUI:
         csv_file.set(0)
         tk.Checkbutton(self.root, font=self.lato13, fg='#242424', text='Export data as CSV file', variable=csv_file).grid(row=8, column=1, padx=25, sticky='ew')
 
+        tk.Label(self.root, font=lato11, fg='#242424', text='Ticket will be saved in \'detections\' folder, while data file will be saved in SmarTraffic folder.').grid(row=9, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
+
         # Horizontal separator
-        ttk.Separator(self.root, orient='horizontal').grid(row=9, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
+        ttk.Separator(self.root, orient='horizontal').grid(row=10, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
 
         # STEP 3
-        tk.Label(self.root, font=lato12, fg='#242424', text='STEP 3\nPress \"Play\" and see how the program work').grid(row=10, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
+        tk.Label(self.root, font=lato12, fg='#242424', text='STEP 3\nPress \"Play\" and see how the program work').grid(row=11, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
 
         # Play button
-        tk.Button(self.root, font=self.lato13, bg='#53c918', fg='#242424', activebackground='#80ff40', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, csv_file), width=8, state='normal').grid(row=11, column=0, columnspan=2, pady=10,)
+        tk.Button(self.root, font=self.lato13, bg='#53c918', fg='#242424', activebackground='#80ff40', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, csv_file), width=8, state='normal').grid(row=12, column=0, columnspan=2, pady=10,)
 
         # Horizontal separator
-        ttk.Separator(self.root, orient='horizontal').grid(row=12, column=0, columnspan=2, padx=10, pady=10, sticky='ew')
+        ttk.Separator(self.root, orient='horizontal').grid(row=13, column=0, columnspan=2, padx=10, pady=10, sticky='ew')
 
         # Tutorial button
-        tk.Label(self.root, font=lato12, fg='#242424', text='Need some help?').grid(row=13, column=0, columnspan=2)
-        tk.Button(self.root, font=self.lato12italic, fg='#242424', activeforeground='#001263', text='Check out the documentation', command=lambda: webbrowser.open('https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic', new=0, autoraise=True)).grid(row=14, column=0, columnspan=2, padx=10, pady=5)
+        tk.Label(self.root, font=lato12, fg='#242424', text='Need some help?').grid(row=14, column=0, columnspan=2)
+        tk.Button(self.root, font=self.lato12italic, fg='#242424', activeforeground='#001263', text='Check out the documentation', command=lambda: webbrowser.open('https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic', new=0, autoraise=True)).grid(row=15, column=0, columnspan=2, padx=10, pady=5)
 
         # Author
-        tk.Label(self.root, font=lato10italic, fg='#a0a0a0', text='MatteoRaffaeleDeSilvestri').grid(row=15, column=0, columnspan=2, sticky='e')
+        tk.Label(self.root, font=lato10italic, fg='#a0a0a0', text='MatteoRaffaeleDeSilvestri').grid(row=16, column=0, columnspan=2, sticky='e')
 
         # OS detection
         if sys.platform.capitalize() != 'Linux':
@@ -474,14 +484,14 @@ class GUI:
     def play_update(self, variable, dp, sts, tkt, csv_file):
 
         # "Lock" play button
-        tk.Button(self.root, font=self.lato13, bg='#b3fc8d', fg='#242424', text='Playing', width=8, state='disabled').grid(row=11, column=0, columnspan=2)
+        tk.Button(self.root, font=self.lato13, bg='#b3fc8d', fg='#242424', text='Playing', width=8, state='disabled').grid(row=12, column=0, columnspan=2)
         self.root.update()
         
         # Run the program
         GUI.run(self, 'video/{}'.format(self.cameras[variable.get()]), dp.get(), sts.get(), tkt.get(), csv_file.get())
         
         # "Unlock" play button
-        tk.Button(self.root, font=self.lato13, bg='#53c918', fg='#242424', activebackground='#80ff40', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, csv_file),  width=8, state='normal').grid(row=11, column=0, columnspan=2)
+        tk.Button(self.root, font=self.lato13, bg='#53c918', fg='#242424', activebackground='#80ff40', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, csv_file),  width=8, state='normal').grid(row=12, column=0, columnspan=2)
         self.root.update()
 
     def run(self, source, dp, sts, ticket, CSV):
