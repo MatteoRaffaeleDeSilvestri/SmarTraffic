@@ -404,7 +404,7 @@ class GUI:
         logo.grid(row=0, column=0, columnspan=2, padx=50, pady=15)
         logo_img = tk.PhotoImage(file='resources/logo.png')
         logo.create_image(0, 0, anchor='nw', image=logo_img)
-        logo.config(bg='#d8d8d8')
+        logo.config(highlightthickness=0)
 
         # Welcome message
         tk.Label(self.root, font=lato14, bg='#d8d8d8', fg='#242424', text='Welcome to SmarTraffic!\nThis demo aims to show how the program works.\nFollow the steps below and see the result').grid(row=1, column=0, columnspan=2, padx=20, pady=15)
@@ -431,12 +431,12 @@ class GUI:
         # Show detection point
         dp = tk.IntVar()
         dp.set(0)
-        tk.Checkbutton(self.root, font=self.lato13, bg='#d8d8d8', fg='#242424', text='Show detection point', variable=dp, width=28).grid(row=4, column=1, padx=25, sticky='w')
+        tk.Checkbutton(self.root, font=self.lato13, bg='#d8d8d8', fg='#242424', activebackground='#d8d8d8', text='Show detection point', variable=dp, width=28).grid(row=4, padx=10, column=1, sticky='w')
 
         # Show live statistics
         sts = tk.IntVar()
         sts.set(0)
-        tk.Checkbutton(self.root, font=self.lato13, bg='#d8d8d8', fg='#242424', text='Show live statistics   ', variable=sts, width=28).grid(row=5, column=1, padx=22, sticky='w')
+        tk.Checkbutton(self.root, font=self.lato13, bg='#d8d8d8', fg='#242424', activebackground='#d8d8d8', text='Show live statistics', variable=sts, width=28).grid(row=5, column=1, sticky='w')
 
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=6, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
@@ -447,14 +447,15 @@ class GUI:
         # Save ticket
         tkt = tk.IntVar()
         tkt.set(0)
-        tk.Checkbutton(self.root, font=self.lato13, bg='#d8d8d8', fg='#242424', text='Save tickets', variable=tkt).grid(row=8, column=0, padx=25, sticky='ew')
+        tk.Checkbutton(self.root, font=self.lato13, bg='#d8d8d8', fg='#242424', activebackground='#d8d8d8', text='Save tickets', variable=tkt).grid(row=8, column=0, padx=25, sticky='ew')
 
         # Export data as CSV file
         csv_file = tk.IntVar()
         csv_file.set(0)
-        tk.Checkbutton(self.root, font=self.lato13, bg='#d8d8d8', fg='#242424', text='Export data as CSV file', variable=csv_file).grid(row=8, column=1, padx=25, sticky='ew')
+        tk.Checkbutton(self.root, font=self.lato13, bg='#d8d8d8', fg='#242424', activebackground='#d8d8d8', text='Export data as CSV file', variable=csv_file).grid(row=8, column=1, padx=25, sticky='ew')
 
-        tk.Label(self.root, font=lato11, bg='#d8d8d8', fg='#242424', text='Ticket will be saved in \'detections\' folder, while data file will be saved in SmarTraffic folder.').grid(row=9, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
+        # Save instructions
+        tk.Label(self.root, font=self.lato12italic, bg='#d8d8d8', fg='#242424', text='Ticket will be saved in \'detections\' folder, while data file will be saved in SmarTraffic folder.').grid(row=9, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
 
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=10, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
@@ -473,7 +474,7 @@ class GUI:
         tk.Button(self.root, font=self.lato12italic, fg='#242424', activeforeground='#001263', text='Check out the documentation', command=lambda: webbrowser.open('https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic', new=0, autoraise=True)).grid(row=15, column=0, columnspan=2, padx=10, pady=5)
 
         # Author
-        tk.Label(self.root, font=lato10italic, fg='#a0a0a0', text='MatteoRaffaeleDeSilvestri').grid(row=16, column=0, columnspan=2, sticky='e')
+        tk.Label(self.root, font=lato10italic, bg='#d8d8d8', fg='#a0a0a0', text='MatteoRaffaeleDeSilvestri').grid(row=16, column=0, columnspan=2, sticky='e')
 
         # OS detection
         if sys.platform.capitalize() != 'Linux':
