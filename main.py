@@ -455,7 +455,7 @@ class GUI:
         tk.Checkbutton(self.root, font=self.lato13, bg='#d8d8d8', fg='#242424', activebackground='#d8d8d8', text='Export data as CSV file', variable=csv_file).grid(row=8, column=1, padx=25, sticky='ew')
 
         # Save instructions
-        tk.Label(self.root, font=self.lato12italic, bg='#d8d8d8', fg='#242424', text='Ticket will be saved in \'detections\' folder, while data file will be saved in SmarTraffic folder.').grid(row=9, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
+        tk.Label(self.root, font=self.lato12italic, bg='#d8d8d8', fg='#001263', text='Ticket will be saved in \'detections\' folder, while data file will be saved in SmarTraffic folder.').grid(row=9, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
 
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=10, column=0, columnspan=2, padx=10, pady=5, sticky='ew')
@@ -541,11 +541,13 @@ class GUI:
             video.play()
 
             # "Detection" button update
-            tk.Button(self.root, font=self.lato13, bg='#b3fc8d', fg='#242424', text='Detecting', width=8, state='disabled').grid(row=13, column=0, columnspan=2)
+            tk.Button(self.root, font=self.lato13, bg='#b3fc8d', fg='#242424', text='Detecting', width=8, state='disabled').grid(row=12, column=0, columnspan=2)
             self.root.update()
 
-            # Make object recognition (AFTER playing video)
-            video.detector(1, ticket, CSV)
+            if ticket or CSV:
+                
+                # Make object recognition (AFTER playing video)
+                video.detector(1, ticket, CSV)
 
 def timer(year, month, day, h, m, s):
 
