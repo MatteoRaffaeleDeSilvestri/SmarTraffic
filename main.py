@@ -192,11 +192,12 @@ class Video:
 
         # Prepare 'detections' folder
         if tkt:
+            
             if os.path.isdir('detections'):
 
                 # Clean detections folder from old ticket (if present)
                 for ticket in os.listdir('detections')[:]:
-                    os.remove(ticket)
+                    os.remove('detections/{}'.format(ticket))
             else:
 
                 # Create 'detections' folder (if not present)
@@ -360,8 +361,9 @@ class Video:
                     # Delete original photo
                     os.remove('.tmp/{}'.format(photo))
                 
-                # Stop for "non-linux OS"
-                if mode: break
+            # Stop for "non-linux OS"
+            elif mode:
+                break
                     
             else:
 
@@ -478,7 +480,7 @@ class GUI:
 
         # OS detection
         if sys.platform.capitalize() != 'Linux':
-            messagebox.showinfo('Attention', '{} OS detected.\nThe program appearance and workflow is different for OS different from Linux.\nCheck out the documentation for more informations.'.format(sys.platform.capitalize()))
+            messagebox.showinfo('Attention', '{} platform detected.\nThe program appearance and workflow is different for OS different from Linux.\nCheck out the documentation for more informations.'.format(sys.platform.capitalize()))
 
         # Start main loop (GUI)
         self.root.mainloop()
@@ -508,7 +510,7 @@ class GUI:
 
         video = Video(self.net, self.classes, source, dp, sts)
 
-        # Use multiprocessing to simulate real-time operations in linux OS 
+        # Use multiprocessing to simulate real-time operations in linux OS
         if sys.platform == 'linux':
         
             # Initialize process
