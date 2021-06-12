@@ -114,7 +114,7 @@ The GUI has the following structure:
 
         ![](resources/data.png "An example of data file")
 
-    Data file is saved directly in <i><b>SmarTraffic</b></i> folder and the file is deleted until a new detection is started and is required to save other data.
+        Data file is saved directly in <i><b>SmarTraffic</b></i> folder and the file is deleted until a new detection is started and is required to save other data.
 
     The idea behind this two methods is that the first one can be used to have  immediate information about each detection, while the second one can be use for long term purposes (<i>e.g. traffic prevision</i>);
 
@@ -150,7 +150,7 @@ For ticket file, the information are "printed" on an empty ticket and a photo of
 
 For data file, at the start of video, an empty CSV file is created on the SmarTraffic folder. At this file is immediately added an "header" which indicates the type of information represented: <i>vehicle ID</i>, <i>area</i>, <i>detection</i>, <i>confidence</i>, <i>direction</i>, <i>date</i>, <i>time</i> and <i>status</i>.<br>For each detection, a new line (<i>record</i>) is added to the file.
 
-<b>IMPORTANT</b>: As indicatend in the [Setup](#Setup "Go to the section") section, for "non-Linux" OS the program make the detection procedure AFTER playing the video. 
+<b>IMPORTANT</b>: As indicated in the [Setup](#Setup "Go to the section") section, for <i>"non-Linux"</i> OS the program make the detection procedure AFTER playing the video. 
 
 ## Practical application
 
