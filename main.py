@@ -480,7 +480,13 @@ class GUI:
 
         # OS detection
         if sys.platform.capitalize() != 'Linux':
-            messagebox.showinfo('Attention', '{} platform detected.\nThe program appearance and workflow is different for OS different from Linux.\nCheck out the documentation for more informations.'.format(sys.platform))
+            os = {'aix': 'AIX',
+                  'linux': 'Linux',
+                  'win32': 'Windows',
+                  'cygwin': 'Windows/Cygwin',
+                  'darwin': 'MacOS'
+            }
+            messagebox.showinfo('Attention', '{} OS detected.\nThe program appearance and workflow is different for OS different from Linux.\nCheck out the documentation for more informations.'.format(os[sys.platform]))
 
         # Start main loop (GUI)
         self.root.mainloop()
