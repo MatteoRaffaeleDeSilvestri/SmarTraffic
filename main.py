@@ -509,10 +509,6 @@ class GUI:
         # Clean .tmp folder from old photos (if present)
         for photo in os.listdir('.tmp')[:]:
             os.remove('.tmp/{}'.format(photo))
-        
-        # Remove previous csv file (if present)
-        if os.path.isfile('data.csv'):
-            os.remove('data.csv')
 
         video = Video(self.net, self.classes, source, dp, sts)
 
