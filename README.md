@@ -65,7 +65,7 @@ If not already installed on the system, they can be installed both individually 
 2. Type the following command in the terminal:
 
     ```console
-    pip3 install -r requirements.txt
+    pip3 install -r requirements.txt 
     ```
 
 Before running the program, it's important to download the following file:
