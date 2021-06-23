@@ -68,15 +68,26 @@ If not already installed on the system, they can be installed both individually 
     pip3 install -r requirements.txt
     ```
 
-Before running the program, it's important to download the following file and put it manually in the respective folders (overwriting the existingone):
+Before running the program, it's important to download the following file:
 
-* <b>yolo/</b>[<b>yolov4.weights</b>](https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic/blob/master/yolo/yolov4.weights) [<i>246.0 Mb</i>]
-* <b>video/</b>[<b>camera_1.mp4</b>](https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic/blob/master/video/camera_1.mp4) [<i>36.9 Mb</i>]
-* <b>video/</b>[<b>camera_2.mp4</b>](https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic/blob/master/video/camera_2.mp4) [<i>64.9 Mb</i>]
-* <b>video/</b>[<b>camera_3.mp4</b>](https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic/blob/master/video/camera_3.mp4) [<i>27.6 Mb</i>]
-* <b>video/</b>[<b>camera_4.mp4</b>](https://github.com/MatteoRaffaeleDeSilvestri/SmarTraffic/blob/master/video/camera_4.mp4) [<i>38.0 Mb</i>]
+* <b>[yolo](https://drive.google.com/drive/folders/1HXR8y-62CmyzKNPjBT5f93rGzOl-MiNA?usp=sharing)</b>
+
+    - coco.names [<i>624 b</i>]
+    - yolov4.cfg [<i>12 Kb</i>]
+    - yolov4.weights [<i>245.8 Mb</i>]
+
+* <b>[video](https://drive.google.com/drive/folders/1M5Kwhl4MMnjV1YGhimSPhsuC0LpWLkd8?usp=sharing)</b>
+
+    - camera_1.mp4 [<i>36.9 Mb</i>]
+    - camera_2.mp4 [<i>64.9 Mb</i>]
+    - camera_3.mp4 [<i>27.6 Mb</i>]
+    - camera_4.mp4 [<i>38.0 Mb</i>]
 
 <i>This action is required because the size of this file is too big for GitHub to store directly, so it's been used the LTS GitHub cloud service.</i>
+
+The final project structure should be this one:
+
+![](resources/folder.png "SmarTraffic")
 
 To run the program just go to the project folder and excute the following command:
 
