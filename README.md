@@ -68,7 +68,7 @@ If not already installed on the system, they can be installed both individually 
     pip3 install -r requirements.txt 
     ```
 
-Before running the program, it's important to download the following file:
+Before running the program, it's important to download the following file (<i>this action is required because the size of this file is too big for GitHub to store directly, so it's been used Google Drive as an alternative</i>):
 
 * <b>[yolo](https://drive.google.com/drive/folders/1HXR8y-62CmyzKNPjBT5f93rGzOl-MiNA?usp=sharing)</b>
 
@@ -83,9 +83,7 @@ Before running the program, it's important to download the following file:
     - camera_3.mp4 [<i>27.6 Mb</i>]
     - camera_4.mp4 [<i>38.0 Mb</i>]
 
-<i>This action is required because the size of this file is too big for GitHub to store directly, so it's been used Google Drive as an alternative.</i>
-
-The final project structure should be this one:
+Once downloaded, put every file in the respective folder (yolo file in a folder named "<i>yolo</i>" and camera file in a folder named "<i>video</i>").<br>The final project structure should be this one:
 
 ![](resources/folder.png "SmarTraffic")
 
