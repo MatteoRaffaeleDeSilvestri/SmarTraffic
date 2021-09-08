@@ -56,7 +56,7 @@ The program has been written in <b><i>Python 3.8.5</i></b>.<br>
 In addition, the following libraries are required:
 
 - <b>OpenCV</b> (version: <i>4.5.1.48</i>);
-- <b>Pillow</b> (version: <i>8.2.0</i>).
+- <b>Pillow</b> (version: <i>8.3.2</i>).
 
 If not already installed on the system, they can be installed both individually (<u><i>is strongly suggested to install the exact verison specified for each library</i></u>) or by following the instructions below:
 
