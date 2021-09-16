@@ -466,7 +466,7 @@ class GUI:
         tk.Label(self.root, font=lato12, bg='#d8d8d8', fg='#242424', text='STEP 3\nPress \"Play\" and see how the program work').grid(row=11, column=0, columnspan=2, padx=5, pady=10, sticky='ew')
 
         # Play button
-        tk.Button(self.root, font=self.lato13, bg='#53c918', fg='#242424', activebackground='#80ff40', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, csv_file), width=8, state='normal').grid(row=12, column=0, columnspan=2, pady=10,)
+        tk.Button(self.root, font=self.lato13, bg='#53c918', fg='#242424', activebackground='#80ff40', text='Play', command=lambda: GUI.play_update(self, variable, dp, sts, tkt, csv_file), width=8, state='normal').grid(row=12, column=0, columnspan=2, pady=10)
 
         # Horizontal separator
         ttk.Separator(self.root, orient='horizontal').grid(row=13, column=0, columnspan=2, padx=10, pady=10, sticky='ew')
